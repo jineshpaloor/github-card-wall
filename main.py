@@ -1,11 +1,16 @@
 from flask import Flask
 from flask import render_template
+from card_wall import ProjectCardWall
 
 app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template("index.html", name="Github Card Wall")
+    p = ProjectCardWall("Sahaj")
+    p.set_repo_list()
+    p.build_issue_list()
+    issues_dict = p.get_sorted_issues()
+    return render_template("index.html", issues_dict=issues_dict)
 
 @app.route('/user/<username>')
 def show_user_profile(username):
@@ -19,4 +24,4 @@ def show_issue(issue_id):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
