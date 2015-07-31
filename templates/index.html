@@ -1,44 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="">
-  <meta name="author" content="">
-
-  <title>Github Card Wall</title>
-
-  <!-- Bootstrap core CSS -->
-  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-
-  <!-- Optional theme -->
-  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-
-  <!-- jquery ui css -->
-  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
-
-  <link rel="stylesheet" href="/static/styles.css">
-
-</head>
-<body>
-  <div class="container">
+{% extends "base.html" %}
+{% block content %}
     <h2>Github Card Wall</h2>
     <p> Here comes the body</p>
-  </div>
-
-  <!-- Bootstrap core JavaScript ================================================== -->
-  <!-- Placed at the end of the document so the pages load faster -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-  <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-  <script src="/static/js/vendor/bootstrap/docs.min.js"></script>
-  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-  <!-- Include all compiled plugins (below), or include individual files as needed -->
-  <!-- Latest compiled and minified JavaScript -->
-  <script src="/static/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
-  <!-- multipurpose js used through out the site -->
-  <script src="/static/js/common.js"></script>
-
-</body>
-</html>
+{% endblock %}
