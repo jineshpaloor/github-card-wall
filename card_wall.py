@@ -15,6 +15,10 @@ class ProjectCardWall(object):
         self.git_hub = Github(
             GITHUB_PROFILE.get('user_name'), 
             GITHUB_PROFILE.get('password'))
+        self.label_order_dict = {
+            'help wanted': 1, 'wontfix': 5, 'question': 2, 
+            'bug': 4, 'enhancement': 3}
+        self.label_order = ['help wanted', 'question', 'enhancement',  'bug', 'wontfix']
 
     def set_repo_list(self):
         # read all the repositories for this user
