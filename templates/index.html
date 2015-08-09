@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-    if g.user:
-        t = 'Hello! <a href="{{ url_for("user") }}">Get user</a> ' \
-            '<a href="{{ url_for("logout") }}">Logout</a>'
-    else:
-        t = 'Hello! <a href="{{ url_for("login") }}">Login</a>'
 
+{% if g.user %}
+  <p>Hello! <a href="{{ url_for("user") }}">Get user</a> <a href="{{ url_for("logout") }}">Logout</a> </p>
+{% else %}
+  <p>Hello! <a href="{{ url_for("login") }}">Login</a> </p>
+{% endif %}
 
 {% endblock %}

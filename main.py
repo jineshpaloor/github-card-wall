@@ -1,5 +1,6 @@
 from flask import Flask, request, g, session, redirect, url_for
 from flask import render_template_string
+from flask import render_template
 from flask.ext.github import GitHub
 
 from sqlalchemy import create_engine
