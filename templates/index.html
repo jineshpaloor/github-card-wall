@@ -1,25 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>Github Card Wall</h2>
-    <table class="table table-responsive">
-    <tr>
-    {% for label in label_order_list %}
-    <td id="{{ label }}" class="droppable">
-        <table class="table table-bordered table-responsive">
-        <tr class="info"><th colspan="3">{{ label }}</th></tr>
-        </table>
-        {% for issue in issues_dict.get(label) %}
-          <table id="issue-{{ issue.issue.id }}" data-repo={{ issue.issue.repository.name }} class="table table-striped table-bordered table-responsive draggable">
-              <tr><td>Title: {{ issue.issue.title }}</td></tr>
-              <tr><td>Body: {{ issue.issue.body }}</td></tr>
-              <tr><td>Repo: {{ issue.issue.repository.name }}</td></tr>
-          </table>
-        {% endfor %}
-      </td>
-    {% endfor %}
-    </tr>
-    </table>
-    <script type=text/javascript>
-      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-    </script>
+    if g.user:
+        t = 'Hello! <a href="{{ url_for("user") }}">Get user</a> ' \
+            '<a href="{{ url_for("logout") }}">Logout</a>'
+    else:
+        t = 'Hello! <a href="{{ url_for("login") }}">Login</a>'
+
+
 {% endblock %}

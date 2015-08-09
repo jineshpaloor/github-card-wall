@@ -1,62 +1,103 @@
-from github import Github
-from local_settings import GITHUB_PROFILE, REPOSITORIES, LABELS
-from flask import Flask, jsonify, request
-from flask import render_template
-from CardWall import ProjectCardWall
+from flask import Flask, request, g, session, redirect, url_for
+from flask import render_template_string
+from flask.ext.github import GitHub
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET 
+from models import User, Base
+
+# setup flask
 app = Flask(__name__)
-app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+app.config.from_object(__name__)
+
+# setup sqlalchemy
+engine = create_engine(app.config['DATABASE_URI'])
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,
+                                         bind=engine))
+
+Base.query = db_session.query_property()
+
+def init_db():
+    Base.metadata.create_all(bind=engine)
+
+# setup github-flask
+github = GitHub(app)
+
+@app.before_request
+def before_request():
+    g.user = None
+    if 'user_id' in session:
+        g.user = User.query.get(session['user_id'])
 
 
-@app.route('/', methods=['GET'])
+@app.after_request
+def after_request(response):
+    db_session.remove()
+    return response
+
+
+@app.route('/')
 def index():
-    project = ProjectCardWall("Sahaj")
-    issues_dict = project.get_issue_list()
+    if g.user:
+        t = 'Hello! <a href="{{ url_for("user") }}">Get user</a> ' \
+            '<a href="{{ url_for("logout") }}">Logout</a>'
+    else:
+        t = 'Hello! <a href="{{ url_for("login") }}">Login</a>'
+
+    #return render_template_string(t)
     return render_template(
-        "index.html", issues_dict=issues_dict, 
-        label_order_list=project.label_order)
+        "index.html")
 
-@app.route('/user/<username>')
-def show_user_profile(username):
-    # show the user profile for that user
-    return 'User %s' % username
 
-@app.route('/issue/<int:issue_id>')
-def show_issue(issue_id):
-    # show the post with the given id, the id is an integer
-    return 'Issue %d' % issue_id 
+@github.access_token_getter
+def token_getter():
+    user = g.user
+    if user is not None:
+        return user.github_access_token
 
-@app.route('/change_label')
-def change_label():
-    from_label = request.args.get('from_label')
-    to_label = request.args.get('to_label')
-    repo_name = "rohiban/" + request.args.get('repo')
-    #repo_name = "rohiban/bagNBall"
-    issue_id = request.args.get('issue_id').split('-')[1]
 
-    issue = None
-    success = False
+@app.route('/github-callback')
+@github.authorized_handler
+def authorized(access_token):
+    next_url = request.args.get('next') or url_for('index')
+    if access_token is None:
+        return redirect(next_url)
 
-    # crude of doing. This must be replaced
-    git_hub = Github(GITHUB_PROFILE.get('user_name'), GITHUB_PROFILE.get('password'))
-    repo = git_hub.get_repo(repo_name)
-    issues = repo.get_issues()
-    for issue in issues:
-        if int(issue.id) == int(issue_id):
-            issue = issue
-            break
+    user = User.query.filter_by(github_access_token=access_token).first()
+    if user is None:
+        user = User(access_token)
+        db_session.add(user)
+    user.github_access_token = access_token
+    db_session.commit()
 
-    if issue:
-        frm_lbl = issue.repository.get_label(from_label)
-        print 'form label is ', frm_lbl 
-        issue.remove_from_labels(frm_lbl)
+    session['user_id'] = user.id
+    return redirect('/user')
 
-        to_lbl = issue.repository.get_label(to_label)
-        if to_lbl is None:
-            to_lbl = issue.repository.create_label(to_label, "00ff00")
-        issue.add_to_labels(to_lbl)
-        success = True
-    return jsonify(result=success)
+
+@app.route('/login')
+def login():
+    if session.get('user_id', None) is None:
+        return github.authorize()
+    else:
+        return 'Already logged in'
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    return redirect(url_for('index'))
+
+
+@app.route('/user')
+def user():
+    user = g.user
+    if user is not None:
+        return str(github.get('user'))
+
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True)
