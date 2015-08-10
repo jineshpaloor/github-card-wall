@@ -42,15 +42,7 @@ def after_request(response):
 
 @app.route('/')
 def index():
-    if g.user:
-        t = 'Hello! <a href="{{ url_for("user") }}">Get user</a> ' \
-            '<a href="{{ url_for("logout") }}">Logout</a>'
-    else:
-        t = 'Hello! <a href="{{ url_for("login") }}">Login</a>'
-
-    #return render_template_string(t)
-    return render_template(
-        "index.html")
+    return render_template("index.html")
 
 
 @github.access_token_getter
@@ -75,7 +67,7 @@ def authorized(access_token):
     db_session.commit()
 
     session['user_id'] = user.id
-    return redirect('/user')
+    return redirect('/projects')
 
 
 @app.route('/login')
@@ -97,6 +89,11 @@ def user():
     user = g.user
     if user is not None:
         return str(github.get('user'))
+
+
+@app.route('/projects')
+def projects():
+    return render_template("projects.html")
 
 
 if __name__ == '__main__':

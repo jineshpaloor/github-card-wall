@@ -1,0 +1,7 @@
+DATABASE_URI = 'sqlite:////tmp/github-flask.db'
+SECRET_KEY = '<flask secret key>'
+DEBUG = True
+
+# Details from the developer app registered in github
+GITHUB_CLIENT_ID = '<client id>'
+GITHUB_CLIENT_SECRET = '<client secret id>'
