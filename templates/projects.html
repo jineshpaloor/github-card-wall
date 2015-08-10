@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if g.user %}
+  <p>Hello! <a href="{{ url_for("user") }}">Get user</a> <a href="{{ url_for("logout") }}">Logout</a> </p>
+{% else %}
+  <p>Hello! <a href="{{ url_for("login") }}">Login</a> </p>
+{% endif %}
+
+<h3>Projects<h3>
+  <ul>
+      <li>Project1</li>
+  </ul>
+
+{% endblock %}
