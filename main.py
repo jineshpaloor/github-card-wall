@@ -1,13 +1,16 @@
 from flask import Flask, request, g, session, redirect, url_for
 from flask import render_template_string
 from flask import render_template
-from flask.ext.github import GitHub
+from flask.ext.github import GitHub as AuthGithub
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET 
+from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 from models import User, Base
+
+import logging
+from github_api import get_user_login_name
 
 # setup flask
 app = Flask(__name__)
@@ -21,19 +24,23 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 
 Base.query = db_session.query_property()
 
+logging.basicConfig(filename='CardWallApp.log', level=logging.INFO)
+
+
 def init_db():
     Base.metadata.create_all(bind=engine)
 
-# setup github-flask
-github = GitHub(app)
+# setup github-flask authentication instance
+github = AuthGithub(app)
 
+# gets called before every HTTP request is made
 @app.before_request
 def before_request():
-    g.user = None
     if 'user_id' in session:
         g.user = User.query.get(session['user_id'])
 
 
+# gets called after every HTTP request has been serviced by the server
 @app.after_request
 def after_request(response):
     db_session.remove()
@@ -49,6 +56,7 @@ def index():
 def token_getter():
     user = g.user
     if user is not None:
+        logging.info("=== inside if clause ====")
         return user.github_access_token
 
 
@@ -61,10 +69,9 @@ def authorized(access_token):
 
     user = User.query.filter_by(github_access_token=access_token).first()
     if user is None:
-        user = User(access_token)
+        user = User(get_user_login_name(access_token), access_token)
         db_session.add(user)
-    user.github_access_token = access_token
-    db_session.commit()
+        db_session.commit()
 
     session['user_id'] = user.id
     return redirect('/projects')
@@ -88,7 +95,7 @@ def logout():
 def user():
     user = g.user
     if user is not None:
-        return str(github.get('user'))
+        return user.username
 
 
 @app.route('/projects')
