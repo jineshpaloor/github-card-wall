@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
-from models import User, Base
+from models import Project, User, Base
 
 import logging
 from github_api import get_user_login_name
@@ -100,8 +100,21 @@ def user():
 
 @app.route('/projects')
 def projects():
-    return render_template("projects.html")
+    # projects = ['ekStep', 'Pratham Books', 'mUzima']
+    projects = Project.query.filter_by(author_id=g.user.id)
+    return render_template("projects.html", project_list=projects)
 
+
+@app.route('/new_project')
+def create_project():
+    project = Project(g.user.username, g.user.id)
+    db_session.add(project)
+    db_session.commit()
+    return redirect('/projects')
+
+@app.route('/join_project')
+def join_project():
+    pass
 
 if __name__ == '__main__':
     import os
