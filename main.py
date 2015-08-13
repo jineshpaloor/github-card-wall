@@ -7,10 +7,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
-from models import Project, User, Base
+from models import Repository, Project, User, Base
 
 import logging
-from github_api import get_user_login_name
+from github_api import get_user_login_name, get_repo_list
 
 # setup flask
 app = Flask(__name__)
@@ -106,15 +106,43 @@ def projects():
 
 
 @app.route('/new_project')
+def new_project():
+    #project = Project(g.user.username, g.user.id)
+    #db_session.add(project)
+    #db_session.commit()
+    return render_template("new_project.html", repo_dict=get_repo_list(g.user))
+
+@app.route('/create_project', methods=['POST'])
 def create_project():
-    project = Project(g.user.username, g.user.id)
+    # pdb.set_trace()
+
+    project = Project(request.form['project_name'], g.user.id)
     db_session.add(project)
     db_session.commit()
-    return redirect('/projects')
 
-@app.route('/join_project')
-def join_project():
-    pass
+    #logging.info('-' * 20)
+    #logging.info(len(request.form['repository[]']), request.form['repository'].__dict__)
+    # repo_list = request.form['repository']
+
+    for repo in repo_list:
+        repo = Repository(repo, 456, project.id)
+        db_session.add(repo)
+    db_session.commit()
+    return redirect('/projects')
+    # return render_template("select_repos.html",
+    #                        project_name=request.form['project_name'],
+    #                        repo_dict=get_repo_list(g.user))
+
+@app.route('/add_repos', methods=['POST'])
+def add_repos():
+    # for repo in request.form['repo_list']:
+    #     if repo.get['selection'] == 'yes':
+    #         Repository(repo.get['name'], repo.get['git_id'])
+    project = Project(request.form['project_name'], g.user.id)
+    repo = Repository(request.form['repository'], 123)
+    db_session.add(project, repo)
+    db_session.commit()
+    return redirect('/projects')
 
 if __name__ == '__main__':
     import os

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+    {% if g.user %}
+        <h3>New Project for {{ g.user.username }}</h3>
+
+        <form method="post" action="{{ url_for("create_project") }}">
+            <label for="project_name"> Project Name:</label>
+            <input type="text" name="project_name" value=""
+                   maxlength="100" placeholder="Enter name of the project"> <br />
+            </br>
+            <label for="repository"> Repository Name:</label>
+            <select name="repository[]" multiple="multiple">
+            {% for repo_name in repo_dict %}
+                <option value="{{ repo_name }}">{{ repo_name }}</option>
+            {% endfor %}
+            </select>
+            <input type="submit" />
+        </form>
+    {% endif %}
+
+{% endblock %}

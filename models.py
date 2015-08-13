@@ -28,9 +28,22 @@ class Project(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100))
     author_id = Column(Integer, ForeignKey('users.id'))
+    repositories = relationship("Repository", backref='projects')
 
     def __init__(self, name, author):
         self.name = name
         self.author_id = author
 
 
+class Repository(Base):
+    __tablename__ = 'repositories'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100))
+    github_repo_id = Column(Integer)
+    project_id = Column(Integer, ForeignKey('projects.id'))
+
+    def __init__(self, name, repo_id, project_id):
+        self.name = name
+        self.github_repo_id = repo_id
+        self.project_id = project_id
