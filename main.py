@@ -100,32 +100,22 @@ def user():
 
 @app.route('/projects')
 def projects():
-    # projects = ['ekStep', 'Pratham Books', 'mUzima']
     projects = Project.query.filter_by(author_id=g.user.id)
     return render_template("projects.html", project_list=projects)
 
 
 @app.route('/new_project')
 def new_project():
-    #project = Project(g.user.username, g.user.id)
-    #db_session.add(project)
-    #db_session.commit()
     return render_template("new_project.html", repo_dict=get_repo_list(g.user))
 
 @app.route('/create_project', methods=['POST'])
 def create_project():
-    # pdb.set_trace()
-
     project = Project(request.form['project_name'], g.user.id)
     db_session.add(project)
     db_session.commit()
 
-    #logging.info('-' * 20)
-    #logging.info(len(request.form['repository[]']), request.form['repository'].__dict__)
-    # repo_list = request.form['repository']
-
-    for repo in repo_list:
-        repo = Repository(repo, 456, project.id)
+    for repo in request.form.getlist('repository'):
+        repo = Repository(repo, 789, project.id)
         db_session.add(repo)
     db_session.commit()
     return redirect('/projects')
