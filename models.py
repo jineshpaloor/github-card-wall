@@ -29,6 +29,7 @@ class Project(Base):
     name = Column(String(100))
     author_id = Column(Integer, ForeignKey('users.id'))
     repositories = relationship("Repository", backref='projects')
+    labels=relationship("Label", backref='projects')
 
     def __init__(self, name, author):
         self.name = name
