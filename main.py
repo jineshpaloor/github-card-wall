@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
-from models import Label, Repository, Project, User, Base
+from models import Labels, Repository, Projects, Users, Base
 
 import logging
 from github_api import get_user_login_name, get_repo_list, get_label_list, get_issue_dict, change_issue_label
@@ -17,7 +17,8 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 # setup sqlalchemy
-engine = create_engine(app.config['DATABASE_URI'])
+#engine = create_engine(app.config['DATABASE_URI'])
+engine = create_engine(app.config['DATABASE_URI'], isolation_level="READ UNCOMMITTED")
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
@@ -37,7 +38,7 @@ github = AuthGithub(app)
 @app.before_request
 def before_request():
     if 'user_id' in session:
-        g.user = User.query.get(session['user_id'])
+        g.user = Users.query.get(session['user_id'])
 
 
 # gets called after every HTTP request has been serviced by the server
@@ -45,11 +46,6 @@ def before_request():
 def after_request(response):
     db_session.remove()
     return response
-
-
-@app.route('/')
-def index():
-    return render_template("index.html")
 
 
 # is called by Github to access the token when it needs
@@ -68,14 +64,19 @@ def authorized(access_token):
     if access_token is None:
         return redirect(next_url)
 
-    user = User.query.filter_by(github_access_token=access_token).first()
+    user = Users.query.filter_by(github_access_token=access_token).first()
     if user is None:
-        user = User(get_user_login_name(access_token), access_token)
+        user = Users(username=get_user_login_name(access_token), github_access_token=access_token)
         db_session.add(user)
         db_session.commit()
 
     session['user_id'] = user.id
     return redirect('/projects')
+
+
+@app.route('/')
+def index():
+    return render_template("index.html")
 
 
 # the scope parameter is important as it decides
@@ -84,8 +85,7 @@ def authorized(access_token):
 def login():
     if session.get('user_id', None) is None:
         return github.authorize(scope='repo')
-    else:
-        return 'Already logged in'
+    return redirect('/projects')
 
 
 @app.route('/logout')
@@ -102,7 +102,7 @@ def user():
 
 @app.route('/projects')
 def projects():
-    projects = Project.query.filter_by(author_id=g.user.id)
+    projects = Projects.query.filter_by(author_id=g.user.id)
     return render_template("projects.html", project_list=projects)
 
 @app.route('/new_project')
@@ -111,7 +111,7 @@ def new_project():
 
 @app.route('/create_project', methods=['POST'])
 def create_project():
-    project = Project(request.form['project_name'], g.user.id)
+    project = Projects(name=request.form['project_name'], author_id=g.user.id)
     db_session.add(project)
     db_session.commit()
 
@@ -119,7 +119,7 @@ def create_project():
     for repo in request.form.getlist('repository'):
         repo_id, repo_name=repo.split('*')
         repo_name_list.append(repo_name)
-        repository = Repository(repo_name, repo_id, project.id)
+        repository = Repository(name=repo_name, github_repo_id=repo_id, project_id=project.id)
         db_session.add(repository)
     db_session.commit()
     return render_template("select_labels.html", project_name=project.name,
@@ -127,14 +127,14 @@ def create_project():
 
 @app.route('/add_labels', methods=['POST'])
 def add_labels():
-    project = Project.query.filter_by(name=request.form['project']).first()
+    project = Projects.query.filter_by(name=request.form['project']).first()
     repo_list = []
     for repo in project.repositories:
         repo_list.append(repo.name)
     lbl_list = []
     for lbl in request.form.getlist('labels'):
         lbl_list.append(lbl)
-        label = Label(lbl, project.id)
+        label = Labels(name=lbl)
         db_session.add(label)
     db_session.commit()
     issue_dict = get_issue_dict(g.user, repo_list, lbl_list)

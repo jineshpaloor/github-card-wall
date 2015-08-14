@@ -1,4 +1,5 @@
-DATABASE_URI = 'sqlite:////tmp/github-flask.db'
+#DATABASE_URI = 'sqlite:////tmp/github-flask.db'
+DATABASE_URI = "postgresql://localhost/cardwall"
 SECRET_KEY = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 DEBUG = True
 
