@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+
+    {% if g.user %}
+        <h3>Select labels for project: {{ project_name }}</h3>
+
+        <form method="post" action="{{ url_for("add_labels") }}">
+            <input type="hidden" name="project" value="{{ project_name }}"/>
+
+            <label for="labels"> Labels:</label>
+            <select name="labels" multiple="multiple" size="7">
+                {% for label_name in label_list %}
+                    <option value="{{ label_name }}">{{ label_name }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit"/>
+        </form>
+
+    {% endif %}
+{% endblock %}

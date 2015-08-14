@@ -10,9 +10,9 @@
                    maxlength="100" placeholder="Enter name of the project"> <br />
             </br>
             <label for="repository"> Repository Name:</label>
-            <select name="repository" multiple="multiple">
-            {% for repo_name in repo_dict %}
-                <option value="{{ repo_name }}">{{ repo_name }}</option>
+            <select name="repository" multiple="multiple" size="10">
+            {% for (id, name) in repo_list %}
+                <option value="{{ id }}*{{ name }}">{{ name }}</option>
             {% endfor %}
             </select>
             <input type="submit" />

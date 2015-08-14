@@ -47,3 +47,15 @@ class Repository(Base):
         self.name = name
         self.github_repo_id = repo_id
         self.project_id = project_id
+
+
+class Label(Base):
+    __tablename__ = 'labels'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100))
+    project_id = Column(Integer, ForeignKey('projects.id'))
+
+    def __init__(self, name, prj_id):
+        self.name = name
+        self.project_id = prj_id
