@@ -14,7 +14,9 @@ def get_project_list(user_id):
 
 def get_repo_list(user):
     github = Github(login_or_token=user.github_access_token)
-    return [(repo.id, repo.name) for repo in github.search_repositories(query="user:"+user.username)]
+    user = github.get_user()
+    return [(repo.id, repo.name) for repo in user.get_repos(type='all')]
+    #return [(repo.id, repo.name) for repo in github.search_repositories(query="user:"+user.username)]
 
 
 def get_label_list(user, repo_name_list):
@@ -43,7 +45,7 @@ def get_issue_dict(user, repo_list, lbl_list):
                     issue_list = [issue for issue in repo.get_issues(labels=[label])]
                     for issue in issue_list:
                         issues_dict[label_name].append(issue)
-    logging.info(issues_dict)
+    #logging.info(issues_dict)
     return issues_dict
 
 def change_issue_label(user, lbl_from, lbl_to, repo_name, issue_id):

@@ -4,12 +4,21 @@
         <p>Hello! {{ g.user.username }} <a href="{{ url_for("logout") }}">Logout</a> </p>
         <p><a href="{{ url_for("new_project") }}">New Project</a></p>
 
-        <h3>Projects</h3>
-        {% for project in project_list %}
-        <ul>
-            <li>{{ project.name }}</li>
-        </ul>
-        {% endfor %}
+        <form method="post" action="{{ url_for("show_project") }}">
+            <label for="project-id">Project:</label>
+            <select name="project-id" size="5">
+                {% for proj in project_list %}
+                    <option value="{{ proj.id }}">{{ proj.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" />
+        </form>
+        <!--{% for project in project_list %}-->
+        <!--<ul>-->
+            <!--<a href="{{ url_for("show_project") }}" id="{{ project.id }}" >{{ project.name }}</a>-->
+            <!--</br>-->
+        <!--</ul>-->
+        <!--{% endfor %}-->
     {% else %}
         <p><a href="{{ url_for("login") }}">Login (using Github) </a> </p>
     {% endif %}

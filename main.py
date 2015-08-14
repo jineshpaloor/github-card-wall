@@ -151,6 +151,16 @@ def change_label():
 
     return jsonify({'success':True})
 
+@app.route('/show_project', methods=['POST'])
+def show_project():
+    project_id = request.form.get('project-id')
+    project = Project.query.get(int(project_id))
+    lbl_list = [label.name for label in project.labels]
+    repo_list = [repo.name for repo in project.repositories]
+    issue_dict = get_issue_dict(g.user, repo_list, lbl_list)
+    return render_template('/issues_list.html', project_name=project.name,
+                           label_list=lbl_list, issues_dict=issue_dict)
+
 if __name__ == '__main__':
     import os
     init_db()

@@ -6,7 +6,7 @@
         drop: function(e, ui) {
             var issue_id = ui.draggable.attr("id");
             var repo = ui.draggable.attr("data-repo");
-            var from_label = ui.draggable.parents("td").attr("id");
+            var from_label = ui.draggable.attr("data-label");
             var to_label = $(this).attr('id');
             console.log("label: ", from_label, to_label, issue_id, repo);
             if (from_label == to_label){return false}
@@ -17,6 +17,7 @@
                 {'from_label': from_label, 'to_label': to_label, 'issue_id': issue_id, 'repo': repo},
                 function(data) {
                     if(data.success) alert("label changed");
+                        //ui.draggable.attr("data-label").val = to_label
                     else alert("operation failed. Please reload the page");
                 }
             );
