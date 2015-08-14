@@ -1,5 +1,5 @@
 from flask import Flask, request, g, session, redirect, url_for
-from flask import render_template_string
+from flask import render_template_string, jsonify
 from flask import render_template
 from flask.ext.github import GitHub as AuthGithub
 
@@ -10,7 +10,7 @@ from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GI
 from models import Label, Repository, Project, User, Base
 
 import logging
-from github_api import get_user_login_name, get_repo_list, get_label_list
+from github_api import get_user_login_name, get_repo_list, get_label_list, get_issue_dict, change_issue_label
 
 # setup flask
 app = Flask(__name__)
@@ -97,12 +97,10 @@ def user():
     if user is not None:
         return user.username
 
-
 @app.route('/projects')
 def projects():
     projects = Project.query.filter_by(author_id=g.user.id)
     return render_template("projects.html", project_list=projects)
-
 
 @app.route('/new_project')
 def new_project():
@@ -127,12 +125,29 @@ def create_project():
 @app.route('/add_labels', methods=['POST'])
 def add_labels():
     project = Project.query.filter_by(name=request.form['project']).first()
+    repo_list = []
+    for repo in project.repositories:
+        repo_list.append(repo.name)
+    lbl_list = []
     for lbl in request.form.getlist('labels'):
+        lbl_list.append(lbl)
         label = Label(lbl, project.id)
         db_session.add(label)
     db_session.commit()
-    return redirect('/projects')
-    #return render_template('/issues_list.html', label_order_list=None)
+    issue_dict = get_issue_dict(g.user, repo_list, lbl_list)
+    return render_template('/issues_list.html', label_list=lbl_list, issues_dict=issue_dict)
+                           #issues_dict=get_issue_dict(g.user, repo_list, lbl_list))
+
+@app.route('/change_label', methods=['GET'])
+def change_label():
+    from_label = request.args.get('from_label')
+    to_label = request.args.get('to_label')
+    issue_number = request.args.get('issue_id')
+    repo_name = request.args.get('repo')
+
+    change_issue_label(g.user, from_label, to_label, repo_name, issue_number)
+
+    return jsonify({'success':True})
 
 if __name__ == '__main__':
     import os

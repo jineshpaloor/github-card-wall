@@ -13,14 +13,14 @@
 
             // send ajax request to change label
             $.getJSON(
-                $SCRIPT_ROOT + '/change_label', 
-                {'from_label': from_label, 'to_label': to_label, 'issue_id': issue_id, 'repo': repo}, 
+                $SCRIPT_ROOT + '/change_label',
+                {'from_label': from_label, 'to_label': to_label, 'issue_id': issue_id, 'repo': repo},
                 function(data) {
-                    if(data.result) alert("label changed");
+                    if(data.success) alert("label changed");
                     else alert("operation failed. Please reload the page");
                 }
             );
-        } 
+        }
     });
 
 
@@ -28,7 +28,7 @@
     // var drake = dragula({});
 
     // $(".draggable").on("click", function(e){
-        // console.log('clicked'); 
+        // console.log('clicked');
         // drake.containers.push(this);
     // });
      //dragula([document.querySelector(".draggable")]);

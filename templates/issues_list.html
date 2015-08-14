@@ -3,18 +3,20 @@
     <h2>Github Card Wall</h2>
     <table class="table table-responsive">
     <tr>
-    {% for label in label_order_list %}
+    {% for label in label_list %}
     <td id="{{ label }}" class="droppable">
         <table class="table table-bordered table-responsive">
-        <tr class="info"><th colspan="3">{{ label }}</th></tr>
+            <tr class="info"><th colspan="3">{{ label }}</th></tr>
         </table>
-        {% for issue in issues_dict.get(label) %}
-          <table id="issue-{{ issue.issue.id }}" data-repo={{ issue.issue.repository.name }} class="table table-striped table-bordered table-responsive draggable">
-              <tr><td>Title: {{ issue.issue.title }}</td></tr>
-              <tr><td>Body: {{ issue.issue.body }}</td></tr>
-              <tr><td>Repo: {{ issue.issue.repository.name }}</td></tr>
-          </table>
-        {% endfor %}
+        {% if issues_dict.get(label) %}
+            {% for issue in issues_dict.get(label) %}
+            <table id="{{ issue.number }}" data-repo={{ issue.repository.name }} class="table table-striped table-bordered table-responsive draggable">
+                <tr><td>Title: {{ issue.title }}</td></tr>
+                <tr><td>Body: {{ issue.body }}</td></tr>
+                <tr><td>Repo: {{ issue.repository.name }}</td></tr>
+            </table>
+            {% endfor %}
+        {% endif %}
       </td>
     {% endfor %}
     </tr>
