@@ -52,14 +52,15 @@ def index():
     return render_template("index.html")
 
 
+# is called by Github to access the token when it needs
 @github.access_token_getter
 def token_getter():
     user = g.user
     if user is not None:
-        logging.info("=== inside if clause ====")
         return user.github_access_token
 
 
+# is called by extension api to handover the token
 @app.route('/github-callback')
 @github.authorized_handler
 def authorized(access_token):
@@ -77,10 +78,12 @@ def authorized(access_token):
     return redirect('/projects')
 
 
+# the scope parameter is important as it decides
+# what one can do with Github object
 @app.route('/login')
 def login():
     if session.get('user_id', None) is None:
-        return github.authorize()
+        return github.authorize(scope='repo')
     else:
         return 'Already logged in'
 
@@ -136,7 +139,7 @@ def add_labels():
     db_session.commit()
     issue_dict = get_issue_dict(g.user, repo_list, lbl_list)
     return render_template('/issues_list.html', label_list=lbl_list, issues_dict=issue_dict)
-                           #issues_dict=get_issue_dict(g.user, repo_list, lbl_list))
+
 
 @app.route('/change_label', methods=['GET'])
 def change_label():
@@ -144,7 +147,6 @@ def change_label():
     to_label = request.args.get('to_label')
     issue_number = request.args.get('issue_id')
     repo_name = request.args.get('repo')
-
     change_issue_label(g.user, from_label, to_label, repo_name, issue_number)
 
     return jsonify({'success':True})

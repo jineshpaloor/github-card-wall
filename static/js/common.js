@@ -5,8 +5,8 @@
     $(".droppable").droppable({
         drop: function(e, ui) {
             var issue_id = ui.draggable.attr("id");
-            var repo = $("#" + issue_id).data("repo");
-            var from_label = $("#" + issue_id).parents("td").attr("id");
+            var repo = ui.draggable.attr("data-repo");
+            var from_label = ui.draggable.parents("td").attr("id");
             var to_label = $(this).attr('id');
             console.log("label: ", from_label, to_label, issue_id, repo);
             if (from_label == to_label){return false}
