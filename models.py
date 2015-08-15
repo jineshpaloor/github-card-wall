@@ -66,4 +66,5 @@ class Labels(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     color = Column(String)
+    order = Column(Integer)
     project_id = Column(Integer, ForeignKey('projects.id'))

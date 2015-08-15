@@ -1,29 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-    <p><a href="{{ url_for("projects") }}">Projects </a></p>
-    </br></br>
-    <h3>{{ project_name }}</h3>
-    <table class="table table-responsive">
-    <tr>
-    {% for label in label_list %}
-    <td id="{{ label }}" class="droppable">
-        <table class="table table-bordered table-responsive">
-            <tr class="info"><th colspan="3">{{ label }}</th></tr>
-        </table>
-        {% if issues_dict.get(label) %}
-            {% for issue in issues_dict.get(label) %}
-            <table id="{{ issue.number }}" data-repo="{{ issue.repository.name }}" data-label="{{ label }}" class="table table-striped table-bordered table-responsive draggable">
-                <tr><td>Title: {{ issue.title }}</td></tr>
-                <tr><td>Body: {{ issue.body }}</td></tr>
-                <tr><td>Repo: {{ issue.repository.name }}</td></tr>
-            </table>
-            {% endfor %}
-        {% endif %}
-      </td>
-    {% endfor %}
-    </tr>
+  <h3>{{ project_name }}</h3>
+  <table class="table table-responsive">
+  <tr>
+  {% for label in label_list %}
+  <td id="{{ label }}" class="droppable">
+    <table class="table table-bordered table-responsive">
+      <tr class="info"><th colspan="3">{{ label }}</th></tr>
     </table>
-    <script type=text/javascript>
-      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-    </script>
+    {% if issues_dict.get(label) %}
+      {% for issue in issues_dict.get(label) %}
+      <table id="{{ issue.number }}" data-repo="{{ issue.repository.name }}" data-label="{{ label }}" class="table table-striped table-bordered table-responsive draggable">
+        <tr><td>Title: {{ issue.title }}</td></tr>
+        <tr><td>Body: {{ issue.body }}</td></tr>
+        <tr><td>Repo: {{ issue.repository.name }}</td></tr>
+      </table>
+      {% endfor %}
+    {% endif %}
+    </td>
+  {% endfor %}
+  </tr>
+  </table>
+  <script type=text/javascript>
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  </script>
 {% endblock %}

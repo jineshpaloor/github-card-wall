@@ -13,10 +13,11 @@ def get_project_list(user_id):
 
 
 def get_repo_list(user):
+    """ Get all github repositories of the user."""
     github = Github(login_or_token=user.github_access_token)
     user = github.get_user()
-    return [(repo.id, repo.name) for repo in user.get_repos(type='all')]
-    #return [(repo.id, repo.name) for repo in github.search_repositories(query="user:"+user.username)]
+    return [('{0}*{1}'.format(repo.id, repo.name), repo.name) 
+            for repo in user.get_repos(type='all')]
 
 
 def get_label_list(user, repo_name_list):

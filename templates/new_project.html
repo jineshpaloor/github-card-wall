@@ -1,22 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
 
-    {% if g.user %}
-        <h3>New Project for {{ g.user.username }}</h3>
+  <div class="row">
+    <div class="col-lg-6 center-block">
+      <div class="well bs-component">
+        <form class="form-horizontal" method="POST" action="{{ url_for("new_project") }}">
 
-        <form method="post" action="{{ url_for("create_project") }}">
-            <label for="project_name"> Project Name:</label>
-            <input type="text" name="project_name" value=""
-                   maxlength="100" placeholder="Enter name of the project"> <br />
-            </br>
-            <label for="repository"> Repository Name:</label>
-            <select name="repository" multiple="multiple" size="10">
-            {% for (id, name) in repo_list %}
-                <option value="{{ id }}*{{ name }}">{{ name }}</option>
-            {% endfor %}
-            </select>
-            <input type="submit" />
+            <div class="form-group">
+              {{ form.name.label(class="col-lg-2 control-label") }}
+              <div class="col-lg-10">
+                {{ form.name(class="form-control") }}
+                {% if form.name.errors %}
+                <ul class="errors">{% for error in form.name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="form-group">
+              {{ form.repositories.label(class="col-lg-2 control-label") }}
+              <div class="col-lg-10">
+                {{ form.repositories(class="form-control") }}
+                {% if form.repositories.errors %}
+                <ul class="errors">{% for error in form.repositories.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="col-lg-10 col-lg-offset-2">
+                <button type="reset" class="btn btn-default">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
+            </div>
+
         </form>
-    {% endif %}
+      </div>
+    </div>
+  </div>
 
 {% endblock %}

@@ -44,17 +44,8 @@
         <div class="navbar-collapse collapse" id="navbar-main">
           {% if g.user %}
           <ul class="nav navbar-nav">
-            <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="projects">Projects<span class="caret"></span></a>
-              <ul class="dropdown-menu" aria-labelledby="projects">
-                {% for project in projects %}
-                <li><a href="/projects/{{ project.id }}">{{ project.name }}</a></li>
-                {% endfor %}
-              </ul>
-            </li>
-            <li>
-              <a href="/new-project">Create Project</a>
-            </li>
+            <li> <a href="/projects">Projects</a> </li>
+            <li> <a href="/new-project">Create Project</a> </li>
           </ul>
           {% endif %}
 

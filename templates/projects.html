@@ -1,25 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-    {% if g.user %}
-        <p>Hello! {{ g.user.username }} <a href="{{ url_for("logout") }}">Logout</a> </p>
-        <p><a href="{{ url_for("new_project") }}">New Project</a></p>
 
-        <form method="post" action="{{ url_for("show_project") }}">
-            <label for="project-id">Project:</label>
-            <select name="project-id" size="5">
-                {% for proj in project_list %}
-                    <option value="{{ proj.id }}">{{ proj.name }}</option>
-                {% endfor %}
-            </select>
-            <input type="submit" />
-        </form>
-        <!--{% for project in project_list %}-->
-        <!--<ul>-->
-            <!--<a href="{{ url_for("show_project") }}" id="{{ project.id }}" >{{ project.name }}</a>-->
-            <!--</br>-->
-        <!--</ul>-->
-        <!--{% endfor %}-->
-    {% else %}
-        <p><a href="{{ url_for("login") }}">Login (using Github) </a> </p>
-    {% endif %}
+<div class="list-group">
+    {% for project in project_list %}
+    <a href="/project/{{ project.id }}" class="list-group-item">{{ project.name }}</a>
+    {% endfor %}
+</div>
+
 {% endblock %}

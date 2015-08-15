@@ -8,6 +8,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 from models import Labels, Repository, Projects, Users, Base
+from forms import ProjectForm
 
 import logging
 from github_api import get_user_login_name, get_repo_list, get_label_list, get_issue_dict, change_issue_label
@@ -105,36 +106,37 @@ def logout():
     return redirect('/login')
 
 
-@app.route('/user')
-def user():
-    user = g.user
-    if user is not None:
-        return user.username
-
 @app.route('/projects')
 def projects():
     projects = Projects.query.filter_by(author_id=g.user.id)
     return render_template("projects.html", project_list=projects)
 
-@app.route('/new-project')
+
+@app.route('/new-project', methods=['GET', 'POST'])
 def new_project():
-    return render_template("new_project.html", repo_list=get_repo_list(g.user))
+    form = ProjectForm(request.form)
+    if request.method == 'POST':
+        form.repositories.choices = get_repo_list(g.user)
+        if form.validate():
+            project = Projects(name=form.name.data, author_id=g.user.id)
+            db_session.add(project)
+            db_session.commit()
+    
+            repo_name_list = []
+            for repo in form.repositories.data:
+                repo_id, repo_name = repo.split('*')
+                repo_name_list.append(repo_name)
+                repository = Repository(name=repo_name, github_repo_id=repo_id, project_id=project.id)
+                db_session.add(repository)
+            db_session.commit()
+            return render_template(
+                "select_labels.html", project_name=project.name,
+                label_list=get_label_list(g.user, repo_name_list))
 
-@app.route('/create_project', methods=['POST'])
-def create_project():
-    project = Projects(name=request.form['project_name'], author_id=g.user.id)
-    db_session.add(project)
-    db_session.commit()
+    form.repositories.choices = get_repo_list(g.user)
+    return render_template(
+        "new_project.html", form=form)
 
-    repo_name_list = []
-    for repo in request.form.getlist('repository'):
-        repo_id, repo_name=repo.split('*')
-        repo_name_list.append(repo_name)
-        repository = Repository(name=repo_name, github_repo_id=repo_id, project_id=project.id)
-        db_session.add(repository)
-    db_session.commit()
-    return render_template("select_labels.html", project_name=project.name,
-                           label_list=get_label_list(g.user, repo_name_list))
 
 @app.route('/add_labels', methods=['POST'])
 def add_labels():
@@ -149,7 +151,8 @@ def add_labels():
         db_session.add(label)
     db_session.commit()
     issue_dict = get_issue_dict(g.user, repo_list, lbl_list)
-    return render_template('/issues_list.html', label_list=lbl_list, issues_dict=issue_dict)
+    return render_template(
+        '/issues_list.html', label_list=lbl_list, issues_dict=issue_dict)
 
 
 @app.route('/change_label', methods=['GET'])
@@ -162,15 +165,16 @@ def change_label():
 
     return jsonify({'success':True})
 
-@app.route('/show_project', methods=['POST'])
-def show_project():
-    project_id = request.form.get('project-id')
+
+@app.route('/project/<int:project_id>', methods=['GET'])
+def show_project(project_id):
     project = Projects.query.get(int(project_id))
     lbl_list = [label.name for label in project.labels]
     repo_list = [repo.name for repo in project.repositories]
     issue_dict = get_issue_dict(g.user, repo_list, lbl_list)
-    return render_template('/issues_list.html', project_name=project.name,
-                           label_list=lbl_list, issues_dict=issue_dict)
+    return render_template(
+        '/issues_list.html', label_list=lbl_list, issues_dict=issue_dict)
+
 
 if __name__ == '__main__':
     import os
