@@ -76,6 +76,11 @@ def authorized(access_token):
 
 @app.route('/')
 def index():
+    logging.info("inside index page")
+    if session.get('user_id', None) is None:
+        logging.info("user not in session")
+        return redirect('/login')
+    logging.info("showing index page - {0}".format(session.get('user_id')))
     return render_template("index.html")
 
 
@@ -84,14 +89,20 @@ def index():
 @app.route('/login')
 def login():
     if session.get('user_id', None) is None:
-        return github.authorize(scope='repo')
+        return render_template("login.html")
     return redirect('/projects')
+
+
+@app.route('/github-login')
+def github_login():
+    return github.authorize(scope='repo')
 
 
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
-    return redirect(url_for('index'))
+    g.user = None
+    return redirect('/login')
 
 
 @app.route('/user')
@@ -105,7 +116,7 @@ def projects():
     projects = Projects.query.filter_by(author_id=g.user.id)
     return render_template("projects.html", project_list=projects)
 
-@app.route('/new_project')
+@app.route('/new-project')
 def new_project():
     return render_template("new_project.html", repo_list=get_repo_list(g.user))
 
@@ -134,7 +145,7 @@ def add_labels():
     lbl_list = []
     for lbl in request.form.getlist('labels'):
         lbl_list.append(lbl)
-        label = Labels(name=lbl)
+        label = Labels(name=lbl, project_id=project.id)
         db_session.add(label)
     db_session.commit()
     issue_dict = get_issue_dict(g.user, repo_list, lbl_list)
@@ -154,7 +165,7 @@ def change_label():
 @app.route('/show_project', methods=['POST'])
 def show_project():
     project_id = request.form.get('project-id')
-    project = Project.query.get(int(project_id))
+    project = Projects.query.get(int(project_id))
     lbl_list = [label.name for label in project.labels]
     repo_list = [repo.name for repo in project.repositories]
     issue_dict = get_issue_dict(g.user, repo_list, lbl_list)
