@@ -1,4 +1,3 @@
-
 .container{
   display: table;
   vertical-align: middle;
@@ -7,4 +6,8 @@
 .vertical-center-row{
   display: table-cell;
   vertical-align: middle;
+}
+
+.issue_cell{
+  width: 250px;
 }
