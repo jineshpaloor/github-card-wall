@@ -37,6 +37,7 @@ class Projects(Base):
     author_id = Column(Integer, ForeignKey('users.id'))
 
     repositories = relationship("Repository", backref='projects')
+    labels = relationship("Labels", backref='projects')
 
 
 class Repository(Base):
@@ -65,3 +66,4 @@ class Labels(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     color = Column(String)
+    project_id = Column(Integer, ForeignKey('projects.id'))
