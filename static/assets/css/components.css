@@ -11,3 +11,10 @@
 .issue_cell{
   width: 250px;
 }
+
+#loader_image{
+  position: relative;
+  top: 10px;
+  left: 50px;
+  height: 60px;
+}

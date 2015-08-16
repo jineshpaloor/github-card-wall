@@ -10,7 +10,7 @@
     </table>
     {% if issues_dict.get(label) %}
       {% for issue in issues_dict.get(label) %}
-      <table id="{{ issue.number }}" data-repo="{{ issue.repository.name }}" data-label="{{ label }}" class="table table-striped table-bordered table-responsive draggable">
+      <table id="{{ issue.number }}" data-repo="{{ issue.repository.name }}" data-label="{{ label }}" class="table table-striped table-bordered draggable">
         <tr><td>Title: {{ issue.title }}</td></tr>
         <tr><td>Body: {{ issue.body }}</td></tr>
         <tr><td>Repo: {{ issue.repository.name }}</td></tr>
