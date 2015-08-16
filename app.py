@@ -2,6 +2,7 @@ from flask import Flask, request, g, session, redirect, url_for
 from flask import render_template_string, jsonify
 from flask import render_template
 from flask.ext.github import GitHub as AuthGithub
+from flask.ext.sqlalchemy import SQLAlchemy
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -16,13 +17,11 @@ from github_api import get_user_login_name, get_repo_list, get_label_list, get_i
 # setup flask
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/cardwall'
 
 # setup sqlalchemy
-#engine = create_engine(app.config['DATABASE_URI'])
 engine = create_engine(app.config['DATABASE_URI'], isolation_level="READ UNCOMMITTED")
-db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
-                                         bind=engine))
+db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 
 Base.query = db_session.query_property()
 
