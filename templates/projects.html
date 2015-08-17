@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="list-group">
+<ul class="list-group">
     {% for project in project_list %}
-    <a href="/project/{{ project.id }}" class="list-group-item">{{ project.name }}</a>
+    <li class="list-group-item clearfix">
+        <a href="/project/{{ project.id }}" class="pull-left">{{ project.name }}</a>
+        <a href="/project/{{ project.id }}/edit" class="pull-right btn btn-primary btn-xs">Edit</a> 
+    </li>
     {% endfor %}
-</div>
+</ul>
 
 {% endblock %}
