@@ -1,0 +1,10 @@
+.gitignore
+.Python
+.idea/
+bin/
+lib/
+include/
+*.iml
+*.pyc
+*.json
+CardWallApp.log
