@@ -13,8 +13,8 @@
 }
 
 #loader_image{
-  position: relative;
-  top: 10px;
-  left: 50px;
+  position: absolute;
+  top: 60px;
+  left: 20px;
   height: 60px;
 }
