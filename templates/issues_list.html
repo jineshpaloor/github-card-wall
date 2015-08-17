@@ -5,22 +5,22 @@
   <tr>
   {% for label in label_list %}
   <td id="{{ label }}" class="droppable issue_cell">
-    <table class="table table-bordered table-responsive">
-      <tr class="info"><th colspan="3">{{ label }}</th></tr>
-    </table>
+    <div class="panel panel-default">
+        <div class="panel-heading">{{ label }}</div>
+    </div>
+
     {% if issues_dict.get(label) %}
+      <ul class="list-group">
       {% for issue in issues_dict.get(label) %}
-      <table id="{{ issue.number }}" data-repo="{{ issue.repository.name }}" data-label="{{ label }}" class="table table-striped table-bordered draggable">
-        <tr><td>Title: {{ issue.title }}</td></tr>
-        <tr><td>Body: {{ issue.body }}</td></tr>
-        <tr><td>Repo: {{ issue.repository.name }}</td></tr>
-      </table>
+        <li id="{{ issue.number }}" data-repo="{{ issue.repository.name }}" data-label="{{ label }}" class="list-group-item draggable" id="{{ issue.number }}" data-repo="{{ issue.repository.name }}" data-label="{{ label }}">{{ issue.repository.name }}/{{ issue.title }}</li>
       {% endfor %}
     {% endif %}
     </td>
   {% endfor %}
   </tr>
   </table>
+
+
   <script type=text/javascript>
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>

@@ -76,11 +76,8 @@ def authorized(access_token):
 
 @app.route('/')
 def index():
-    logging.info("inside index page")
     if session.get('user_id', None) is None:
-        logging.info("user not in session")
         return redirect('/login')
-    logging.info("showing index page - {0}".format(session.get('user_id')))
     return render_template("index.html")
 
 
