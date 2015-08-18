@@ -172,6 +172,16 @@ def show_project(project_id):
         '/issues_list.html', label_list=lbl_list, issues_dict=issue_dict)
 
 
+@app.route('/project/<int:project_id>/edit', methods=['GET', 'POST'])
+def edit_project(project_id):
+    project = Projects.query.get(int(project_id))
+    form = ProjectForm(obj=project)
+    form.repositories.choices = get_repo_list(g.user)
+    form.repositories.data = []
+    return render_template(
+        '/new_project.html', form=form)
+
+
 if __name__ == '__main__':
     import os
     init_db()
