@@ -171,6 +171,15 @@ def show_project(project_id):
     return render_template(
         '/issues_list.html', label_list=lbl_list, issues_dict=issue_dict)
 
+@app.route('/project/edit/<int:project_id>', methods=['PUT'])
+def edit_project(project_id):
+    project = Projects.query.get(int(project_id))
+
+    form = ProjectForm()
+    form.name = project.name
+    form.repositories = project.repositories
+
+    return render_template('new_project.html', form=None)
 
 if __name__ == '__main__':
     import os
