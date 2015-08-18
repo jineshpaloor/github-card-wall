@@ -125,30 +125,35 @@ def new_project():
                 repository = Repository(name=repo_name, github_repo_id=repo_id, project_id=project.id)
                 db_session.add(repository)
             db_session.commit()
-            return render_template(
-                "select_labels.html", project_name=project.name,
-                label_list=get_label_list(g.user, repo_name_list))
+            return redirect('/project/{0}/add_labels'.format(project.id))
 
+    # this is for GET request
     form.repositories.choices = get_repo_list(g.user)
     return render_template(
-        "new_project.html", form=form)
+        "new_project.html", form=form, method_type='POST')
 
 
-@app.route('/add_labels', methods=['POST'])
-def add_labels():
-    project = Projects.query.filter_by(name=request.form['project']).first()
-    repo_list = []
-    for repo in project.repositories:
-        repo_list.append(repo.name)
-    lbl_list = []
-    for lbl in request.form.getlist('labels'):
-        lbl_list.append(lbl)
-        label = Labels(name=lbl, project_id=project.id)
-        db_session.add(label)
-    db_session.commit()
-    issue_dict = get_issue_dict(g.user, repo_list, lbl_list)
-    return render_template(
-        '/issues_list.html', label_list=lbl_list, issues_dict=issue_dict)
+@app.route('/project/<int:project_id>/labels', methods=['GET', 'POST'])
+def add_labels(project_id):
+    if request.method == 'GET':
+        project = Projects.query.get(int(project_id))
+        return render_template(
+            "select_labels.html", project=project,
+            label_list=get_label_list(g.user, [repo.name for repo in project.repositories]))
+    else:
+        project = Projects.query.filter_by(name=request.form['project']).first()
+        repo_list = []
+        for repo in project.repositories:
+            repo_list.append(repo.name)
+        lbl_list = []
+        for lbl in request.form.getlist('labels'):
+            lbl_list.append(lbl)
+            label = Labels(name=lbl, project_id=project.id)
+            db_session.add(label)
+        db_session.commit()
+        issue_dict = get_issue_dict(g.user, repo_list, lbl_list)
+        return render_template(
+            '/issues_list.html', label_list=lbl_list, issues_dict=issue_dict)
 
 
 @app.route('/change_label', methods=['GET'])
@@ -172,15 +177,28 @@ def show_project(project_id):
         '/issues_list.html', label_list=lbl_list, issues_dict=issue_dict)
 
 
-@app.route('/project/<int:project_id>/edit', methods=['GET', 'POST'])
+@app.route('/project/<int:project_id>/edit', methods=['GET', 'PUT'])
 def edit_project(project_id):
     project = Projects.query.get(int(project_id))
-    form = ProjectForm(obj=project)
-    form.repositories.choices = get_repo_list(g.user)
-    form.repositories.data = []
-    return render_template(
-        '/new_project.html', form=form)
+    if request.method == 'GET':
+        form = ProjectForm(obj=project)
+        form.repositories.choices = get_repo_list(g.user)
+        form.repositories.data = ['{0}*{1}'.format(repo.github_repo_id, repo.name)
+                                  for repo in project.repositories]
+        return render_template('/new_project.html', form=form, method_type='PUT')
+    else:
+        # for PUT method type
+        form = ProjectForm(request.form)
 
+        new_repo_id_name_dict = dict([repo.split('*') for repo in form.repositories.data])
+        new_repos = new_repo_id_name_dict.values()
+
+        project_repos = [repo.name for repo in project.repositories]
+
+        obsolete_repos = set(project_repos) - set(new_repos)
+        repos_to_be_added = set(new_repos) - set(project_repos)
+
+        pass
 
 if __name__ == '__main__':
     import os
