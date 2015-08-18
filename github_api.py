@@ -11,32 +11,42 @@ def get_user_login_name(access_token):
 def get_project_list(user_id):
     pass
 
+def get_a_repo(github_user, repo_name):
+    f_list = filter(lambda r:r.name == repo_name, github_user.get_repos(type='all'))
+    return f_list[0]
 
 def get_repo_list(user):
     """ Get all github repositories of the user."""
     github = Github(login_or_token=user.github_access_token)
-    user = github.get_user()
+    git_user = github.get_user()
     return [('{0}*{1}'.format(repo.id, repo.name), repo.name) 
-            for repo in user.get_repos(type='all')]
+            for repo in git_user.get_repos(type='all')]
 
 
 def get_label_list(user, repo_name_list):
     label_list = set()
     github = Github(login_or_token=user.github_access_token)
+    git_user = github.get_user()
 
     for repo_name in repo_name_list:
-        repo = github.get_repo(user.username+'/'+repo_name)
-        lbl_list = [lbl for lbl in repo.get_labels()]
-        for lbl in lbl_list:
+        repo = get_a_repo(git_user, repo_name)
+        for lbl in repo.get_labels():
             label_list.add(lbl.name)
+        #repo = git_user.get_repos(user.username+'/'+repo_name)
+        # lbl_list = [lbl for lbl in repo.get_labels()]
+        # for lbl in lbl_list:
+        #     label_list.add(lbl.name)
     return label_list
 
 
 def get_issue_dict(user, repo_list, lbl_list):
     github = Github(login_or_token=user.github_access_token)
+    git_user = github.get_user()
+
     issues_dict = defaultdict(list)
+
     for repo_name in repo_list:
-        repo = get_repository(user, github, repo_name)
+        repo = get_a_repo(git_user, repo_name)
         issue_list = repo.get_issues()
         for issue in issue_list:
             for lbl in issue.labels:
@@ -47,7 +57,8 @@ def get_issue_dict(user, repo_list, lbl_list):
 
 def change_issue_label(user, lbl_from, lbl_to, repo_name, issue_id):
     github = Github(login_or_token=user.github_access_token)
-    repo = get_repository(user, github, repo_name)
+    git_user = github.get_user()
+    repo = get_a_repo(git_user, repo_name)
 
     issue = repo.get_issue(int(issue_id))
 
@@ -69,5 +80,5 @@ def change_issue_label(user, lbl_from, lbl_to, repo_name, issue_id):
 
     return new_label
 
-def get_repository(user, github, repo_name):
-    return github.get_repo(user.username + '/' + repo_name)
+# def get_repository(user, github, repo_name):
+#     return github.get_repo(user.username + '/' + repo_name)
