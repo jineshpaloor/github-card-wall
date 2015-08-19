@@ -12,7 +12,8 @@
     {% if issues_dict.get(label) %}
       <ul class="list-group">
       {% for issue in issues_dict.get(label) %}
-        <li id="{{ issue.number }}" data-repo="{{ issue.repository.name }}" data-label="{{ label }}" class="list-group-item draggable" id="{{ issue.number }}" data-repo="{{ issue.repository.name }}" data-label="{{ label }}">{{ issue.repository.name }} :: {{ issue.title }}</li>
+        <li id="{{ issue.id }}" data-repo="{{ issue.repository.name }}" data-label="{{ label }}" data-number="{{ issue.number }}"
+            class="list-group-item draggable">{{ issue.repository.name }} :: {{ issue.title }}</li>
       {% endfor %}
     {% endif %}
     </td>

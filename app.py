@@ -159,13 +159,14 @@ def add_labels(project_id):
 
 @app.route('/change_label', methods=['GET'])
 def change_label():
+    issue_id = request.args.get('issue_id')
     from_label = request.args.get('from_label')
     to_label = request.args.get('to_label')
-    issue_number = request.args.get('issue_id')
+    issue_number = request.args.get('issue_no')
     repo_name = request.args.get('repo')
     change_issue_label(g.user, from_label, to_label, repo_name, issue_number)
 
-    return jsonify({'success':True})
+    return jsonify({'success' : True, 'issue_id' : issue_id})
 
 
 @app.route('/project/<int:project_id>', methods=['GET'])
