@@ -26,7 +26,8 @@ class Users(Base):
     email_id = Column(String)
     github_access_token = Column(String)
 
-    projects = relationship('Projects', secondary=user_projects, backref='users')
+    projects = relationship('Projects', cascade='all, delete-orphan', single_parent=True,
+                            secondary=user_projects, backref='users')
 
 
 class Projects(Base):
@@ -36,8 +37,8 @@ class Projects(Base):
     name = Column(String)
     author_id = Column(Integer, ForeignKey('users.id'))
 
-    repositories = relationship("Repository", backref='projects')
-    labels = relationship("Labels", backref='projects')
+    repositories = relationship("Repository", cascade='all, delete-orphan', backref='projects')
+    labels = relationship("Labels", cascade='all, delete-orphan', backref='projects')
 
 
 class Repository(Base):
@@ -48,6 +49,8 @@ class Repository(Base):
     github_repo_id = Column(Integer)
     project_id = Column(Integer, ForeignKey('projects.id'))
 
+    issues = relationship("Issues", cascade='all, delete-orphan')
+
 
 class Issues(Base):
     __tablename__ = 'issues'
@@ -57,7 +60,8 @@ class Issues(Base):
     body = Column(String)
     repository = Column(Integer, ForeignKey('repository.id'))
 
-    labels = relationship('Labels', secondary=issue_labels, backref='issues')
+    labels = relationship('Labels', cascade='all, delete-orphan', single_parent=True,
+                          secondary=issue_labels, backref='issues')
 
 
 class Labels(Base):

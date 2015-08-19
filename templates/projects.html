@@ -5,7 +5,8 @@
     {% for project in project_list %}
     <li class="list-group-item clearfix">
         <a href="/project/{{ project.id }}" class="pull-left">{{ project.name }}</a>
-        <a href="/project/{{ project.id }}/edit" class="pull-right btn btn-primary btn-xs">Edit</a> 
+        <a href="/project/{{ project.id }}/delete" class="pull-right btn btn-link btn-xs">Delete</a>
+        <a href="/project/{{ project.id }}/edit" class="pull-right btn btn-link btn-xs">Edit</a>
     </li>
     {% endfor %}
 </ul>
