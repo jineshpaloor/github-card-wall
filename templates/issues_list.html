@@ -6,14 +6,14 @@
   {% for label in label_list %}
   <td id="{{ label }}" class="droppable issue_cell">
     <div class="panel panel-default">
-        <div class="panel-heading">{{ label }}</div>
+        <div style="color:{{ label.color }}" class="panel-heading">{{ label }}</div>
     </div>
 
     {% if issues_dict.get(label) %}
       <ul class="list-group">
       {% for issue in issues_dict.get(label) %}
         <li id="{{ issue.id }}" data-repo="{{ issue.repository.name }}" data-label="{{ label }}" data-number="{{ issue.number }}"
-            class="list-group-item draggable">{{ issue.repository.name }} :: {{ issue.title }}</li>
+            class="list-group-item draggable">[{{ issue.repository.name }}] #{{ issue.number }}-{{ issue.title }}</li>
       {% endfor %}
     {% endif %}
     </td>
