@@ -64,11 +64,15 @@ def authorized(access_token):
     if access_token is None:
         return redirect(next_url)
 
-    user = Users.query.filter_by(github_access_token=access_token).first()
+    user_name = get_user_login_name(access_token)
+    user = Users.query.filter_by(username=user_name).first()
     if user is None:
-        user = Users(username=get_user_login_name(access_token), github_access_token=access_token)
-        db_session.add(user)
-        db_session.commit()
+        user = Users(username=user_name, github_access_token=access_token)
+    else:
+        user.github_access_token = access_token
+
+    db_session.add(user)
+    db_session.commit()
 
     session['user_id'] = user.id
     return redirect('/projects')
@@ -147,14 +151,22 @@ def add_labels(project_id):
             db_session.delete(lbl)
 
         # save selected labels
-        for lbl in request.form.getlist('labels'):
-            label = Labels(name=lbl, project_id=project.id)
+        for i, lbl in enumerate(request.form.getlist('labels')):
+            label = Labels(name=lbl, project_id=project.id, order=i+1)
             db_session.add(label)
         db_session.commit()
         # issue_dict = get_issue_dict(g.user, repo_list, lbl_list)
-        #return render_template(
-        #    '/issues_list.html', label_list=lbl_list, issues_dict=issue_dict)
-        return redirect(url_for('show_project', project_id=project_id))
+        return render_template('/order_labels.html', project=project)
+        # return redirect(url_for('show_project', project_id=project_id))
+
+
+@app.route('/project/<int:project_id>/order-labels', methods=['GET', 'POST'])
+def order_labels(project_id):
+    project = Projects.query.get(int(project_id))
+    # save the order here
+    for label in project.labels:
+        pass
+    return redirect(url_for('show_project', project_id=project_id))
 
 
 @app.route('/change_label', methods=['GET'])

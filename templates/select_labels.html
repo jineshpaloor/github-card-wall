@@ -7,7 +7,7 @@
       <div class="well bs-component">
       <form class="form-horizontal" method="POST" action="{{ url_for("add_labels", project_id=project.id) }}">
 
-        <input type="hidden" name="project" value="{{ project_name }}"/>
+        <input type="hidden" name="project" value="{{ project.name }}"/>
 
         <div class="form-group">
           <label class="col-lg-2 control-label" for="labels">Labels</label>
