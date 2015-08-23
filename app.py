@@ -239,8 +239,8 @@ def edit_project(project_id):
 @app.route('/project/<int:project_id>/delete', methods=['POST'])
 def delete_project(project_id):
     project = Projects.query.get(int(project_id))
-    #db_session.delete(project)
-    #db_session.commit()
+    db_session.delete(project)
+    db_session.commit()
 
     return redirect('/projects')
 
