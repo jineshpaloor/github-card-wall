@@ -8,8 +8,9 @@
         <form action="/project/{{ project.id }}/delete" method="POST">
             <button class='btn btn-danger btn-xs pull-right' type="submit" name="delete_project" value="delete"><span class="fa fa-times"></span> delete</button>
         </form>
-        <a href="/project/{{ project.id }}/edit" class="pull-right btn btn-success btn-xs">Edit Repos</a>
+        <a href="/project/{{ project.id }}/edit" class="pull-right btn btn-primary btn-xs">Edit Repos</a>
         <a href="/project/{{ project.id }}/labels" class="pull-right btn btn-primary btn-xs">Edit Labels</a>
+        <a href="/project/{{ project.id }}/order-labels" class="pull-right btn btn-primary btn-xs">Order Labels</a>
     </li>
     {% endfor %}
 </ul>

@@ -2,9 +2,11 @@
 {% block content %}
   <div class="col-md-6">
     <h3>Order labels for project: {{ project.name }}</h3>
+    <p class="text-info" role="alert">Drag and Drop labels to reorder!</p>
+    <div class="well">
     <ul id="label_order_list" class="list-group">
       {% for label in project.labels %}
-      <li id="{{ label.id }}" class="list-group-item-info list-group-item">
+      <li id="{{ label.id }}" class="list-group-item">
         {{ label.name }}
       </li>
       {% endfor %}
@@ -12,6 +14,7 @@
     <div>
         <input id="save_label_order" type="button" class="btn btn-primary" value="Save"/>
     </div>
+    </div><!-- well -->
   </div>
 
 {% endblock %}
