@@ -126,7 +126,9 @@ def new_project():
             for repo in form.repositories.data:
                 repo_id, repo_name = repo.split('*')
                 repo_name_list.append(repo_name)
-                repository = Repository(name=repo_name, github_repo_id=repo_id, project_id=project.id)
+                repository = Repository(
+                    name=repo_name, github_repo_id=repo_id, 
+                    project_id=project.id)
                 db_session.add(repository)
             db_session.commit()
             return redirect('/project/{0}/labels'.format(project.id))
@@ -155,18 +157,19 @@ def add_labels(project_id):
             label = Labels(name=lbl, project_id=project.id, order=i+1)
             db_session.add(label)
         db_session.commit()
-        # issue_dict = get_issue_dict(g.user, repo_list, lbl_list)
-        return render_template('/order_labels.html', project=project)
-        # return redirect(url_for('show_project', project_id=project_id))
+        return redirect(url_for('order_labels', project_id=project_id))
 
 
 @app.route('/project/<int:project_id>/order-labels', methods=['GET', 'POST'])
 def order_labels(project_id):
     project = Projects.query.get(int(project_id))
-    # save the order here
-    for label in project.labels:
-        pass
-    return redirect(url_for('show_project', project_id=project_id))
+    if request.method == 'GET':
+        return render_template('/order_labels.html', project=project)
+    else:
+        # save the order here
+        for label in project.labels:
+            pass
+        return redirect(url_for('show_project', project_id=project_id))
 
 
 @app.route('/change_label', methods=['GET'])
@@ -233,11 +236,11 @@ def edit_project(project_id):
                                label_list=get_label_list(g.user, new_repos))
 
 
-@app.route('/project/<int:project_id>/delete', methods=['GET', 'POST'])
+@app.route('/project/<int:project_id>/delete', methods=['POST'])
 def delete_project(project_id):
     project = Projects.query.get(int(project_id))
-    db_session.delete(project)
-    db_session.commit()
+    #db_session.delete(project)
+    #db_session.commit()
 
     return redirect('/projects')
 

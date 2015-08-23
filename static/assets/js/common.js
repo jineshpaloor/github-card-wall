@@ -119,11 +119,7 @@ GithubCardWall.labelorderModule = (function(){
             console.log(localStorage);
             //console.log(sortable.toArray());
             console.log(mylist.options.group);
-
-
-
             //var sortable = Sortable.active;
-
         });
     };
 
@@ -134,17 +130,30 @@ GithubCardWall.labelorderModule = (function(){
     };
 })();
 
+GithubCardWall.projectModule = (function(){
+    // define some configuration settings
+    var config = {
+        autoInvokeInit: false
+    };
 
-//(function() {
-    //$("#loader_image").hide();
-    //$(".swim_lane").each(function(i, v){
-      // var ul_id = $(v).attr('id');
-       //Sortable.create(ul_id, {});
-    //});
+    var deleteProject = function(){
+        $('button[name="delete_project"]').on('click', function(e){
+            var $form=$(this).closest('form');
+            console.log("form is ", $form);
+            e.preventDefault();
+            $('#confirm').removeClass("hide");
+            $('#confirm').modal('show').one('click', '#delete', function (e) {
+                $form.trigger('submit');
+            });
+        });
+    };
 
-    //var wall = document.getElementById('card-wall')
-    //Sortable.create(wall, {})
+    var init = function(){
+        deleteProject();
+    };
 
-//})();
-
-
+    return {
+        config: config,
+        init: init
+    };
+})();

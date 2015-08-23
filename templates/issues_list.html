@@ -20,10 +20,8 @@
 {% endblock %}
 
 {% block js_block %}
-    <script type=text/javascript>
-        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-        $(document).ready(function () {
-            GithubCardWall.cardwallModule.perform();
-        });
-    </script>
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $(document).ready(function () {
+      GithubCardWall.cardwallModule.init();
+    });
 {% endblock %}

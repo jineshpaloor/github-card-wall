@@ -1,53 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
+  <div class="col-md-6">
     <h3>Order labels for project: {{ project.name }}</h3>
-        <ul id="label_order_list" class="list-group">
-            {% for label in project.labels %}
-            <li id="{{ label.id }}" class="list-group-item">
-                {{ label.name }}
-            </li>
-            {% endfor %}
-        </ul>
-
+    <ul id="label_order_list" class="list-group">
+      {% for label in project.labels %}
+      <li id="{{ label.id }}" class="list-group-item-info list-group-item">
+        {{ label.name }}
+      </li>
+      {% endfor %}
+    </ul>
     <div>
         <input id="save_label_order" type="button" class="btn btn-primary" value="Save"/>
     </div>
-
-
-  <!--<div class="row">-->
-      <!--<div class="col-lg-6 center-block">-->
-          <!--<div class="well bs-component">-->
-              <!--<form class="form-horizontal" method="POST" action="{{ url_for("order_labels", project_id=project.id) }}">-->
-                  <!--<input type="hidden" name="project" value="{{ project.name }}"/>-->
-                  <!--<div class="form-group">-->
-                      <!--<label class="col-lg-2 control-label" for="label_order_list">Selected Labels</label>-->
-                      <!--<div class="col-lg-10">-->
-                          <!--<select class="form-control" id="label_order_list" multiple="multiple">-->
-                              <!--{% for label in project.labels %}-->
-                              <!--<option value="{{ label.name }}">{{ label.name }}</option>-->
-                              <!--{% endfor %}-->
-                          <!--</select>-->
-                      <!--</div>-->
-                  <!--</div>-->
-
-                  <!--<div class="form-group">-->
-                      <!--<div class="col-lg-10 col-lg-offset-2">-->
-                          <!--<button type="reset" class="btn btn-default">Cancel</button>-->
-                          <!--<button type="submit" class="btn btn-primary">Submit</button>-->
-                      <!--</div>-->
-                  <!--</div>-->
-              <!--</form>-->
-          <!--</div>-->
-      <!--</div>-->
-  <!--</div>-->
+  </div>
 
 {% endblock %}
 
 {% block js_block %}
-    <script type=text/javascript>
-        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-        $(document).ready(function () {
-            GithubCardWall.labelorderModule.init();
-        });
-    </script>
+    $(document).ready(function () {
+        GithubCardWall.labelorderModule.init();
+    });
 {% endblock %}
