@@ -1,22 +1,36 @@
 {% extends "base.html" %}
+
+{% block header %}
+<ul class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li><a href="/projects">Projects</a></li>
+  <li class="active">Issues</li>
+</ul>
+{% endblock %}
+
 {% block content %}
-  <h3>{{ project_name }}</h3>
-    <div id="card-wall">
+  <h3>{{ project.name }}</h3>
+    <table class="table table-responsive" id="card-wall">
+        <tr>
         {% for label in label_list %}
-            <div style="width:25%; float=left">{{ label }}
-            {% if issues_dict.get(label) %}
-                <ul id="{{ label }}" class="list-group">
-                    {% for issue in issues_dict.get(label) %}
+        <td id="{{ label.name }}" class="droppable issue_cell">
+            <div class="panel panel-default">
+                <div style="color:{{ label.color }}" class="panel-heading">{{ label.name }}</div>
+            </div>
+            {% if issues_dict.get(label.name) %}
+                <ul id="{{ label.name }}" class="list-group">
+                    {% for issue in issues_dict.get(label.name) %}
                         <li id="{{ issue.id }}" data-repo="{{ issue.repository.name }}"
-                            data-label="{{ label }}" data-number="{{ issue.number }}" class="list-group-item">
+                            data-label="{{ label.name }}" data-number="{{ issue.number }}" class="list-group-item">
                             [{{ issue.repository.name }}] #{{ issue.number }}-{{ issue.title }}
                         </li>
                     {% endfor %}
                 </ul>
             {% endif %}
-            </div>
+            </td>
         {% endfor %}
-    </div>
+    </tr>
+    </table>
 {% endblock %}
 
 {% block js_block %}

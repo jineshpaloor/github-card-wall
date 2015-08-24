@@ -70,7 +70,7 @@ GithubCardWall.cardwallModule = (function(){
     };
 
     var init = function(){
-        dragNdrop1();
+        dragNdrop2();
     };
     // return an object (this is available globally)
     return {
@@ -108,22 +108,37 @@ GithubCardWall.labelorderModule = (function(){
             onUpdate: function(evt){
                 var label_id = evt.item.getAttribute('id');
                 console.log("on update func :: ", label_id, evt.oldIndex, evt.newIndex);
-                // label.order = evt.newIndex
-                // evt.oldIndex
-                // evt.newIndex
             }
         });
 
+        var update_label_order = function(project_id, label_dict){
+                $.getJSON(
+                    $SCRIPT_ROOT + '/project/'+project_id+'/update-labels' ,
+                    label_dict,
+                    function(data) {
+                        $("#loader_image").addClass("hidden");
+                        if(data.success) {
+                            alert("label changed");
+                        }
+                        else alert("operation failed. Please reload the page");
+                    }
+                );
+
+        };
+
         $("#save_label_order").click(function(){
-            console.log("inside click function");
-            console.log(localStorage);
-            //console.log(sortable.toArray());
-            console.log(mylist.options.group);
-            //var sortable = Sortable.active;
+            var label_dict = {};
+            $("#label_order_list li").each(
+            function(i,v){ 
+                var index = i+1;
+                var label = $(v).text();
+                label_dict[label] = index; 
+            });
+            var project_id = $("#project_id").val();
+            update_label_order(project_id, label_dict);
         });
     };
 
-// return an object (this is available globally)
     return {
         config: config,
         init: init

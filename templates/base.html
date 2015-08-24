@@ -69,7 +69,7 @@
     </div>
 
     <img id="loader_image" class="pull-left hidden" src="/static/assets/img/wait.gif" />
-    <div class="container" id="content" style="margin-top: 50px;">{% block content %}{% endblock %}</div>
+    <div class="container" id="content" style="margin-top: 50px;">{% block header %}{% endblock %}{% block content %}{% endblock %}</div>
 
     <script type=text/javascript>
       $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};

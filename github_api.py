@@ -42,6 +42,7 @@ def get_label_list(user, repo_name_list):
 def get_issue_dict(user, repo_list, lbl_list):
     github = Github(login_or_token=user.github_access_token)
     git_user = github.get_user()
+    label_names = [l.name for l in lbl_list]
 
     issues_dict = defaultdict(list)
 
@@ -50,7 +51,7 @@ def get_issue_dict(user, repo_list, lbl_list):
         issue_list = repo.get_issues()
         for issue in issue_list:
             for lbl in issue.labels:
-                if lbl.name in lbl_list:
+                if lbl.name in label_names:
                     issues_dict[lbl.name].append(issue)
     return issues_dict
 

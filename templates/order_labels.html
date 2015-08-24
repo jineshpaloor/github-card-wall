@@ -1,18 +1,26 @@
 {% extends "base.html" %}
+
+{% block header %}
+<ul class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li><a href="/projects">Projects</a></li>
+  <li class="active">Labels</li>
+</ul>
+{% endblock %}
+
 {% block content %}
   <div class="col-md-6">
     <h3>Order labels for project: {{ project.name }}</h3>
     <p class="text-info" role="alert">Drag and Drop labels to reorder!</p>
     <div class="well">
+        <input type="hidden" value="{{ project.id }}" id="project_id"/>
     <ul id="label_order_list" class="list-group">
-      {% for label in project.labels %}
-      <li id="{{ label.id }}" class="list-group-item">
-        {{ label.name }}
-      </li>
+      {% for label in labels %}
+      <li id="{{ label.id }}" class="list-group-item">{{ label.name }}</li>
       {% endfor %}
     </ul>
     <div>
-        <input id="save_label_order" type="button" class="btn btn-primary" value="Save"/>
+      <input id="save_label_order" type="button" class="btn btn-primary" value="Save"/>
     </div>
     </div><!-- well -->
   </div>
@@ -20,6 +28,7 @@
 {% endblock %}
 
 {% block js_block %}
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
     $(document).ready(function () {
         GithubCardWall.labelorderModule.init();
     });

@@ -1,3 +1,4 @@
+import json
 from flask import Flask, request, g, session, redirect, url_for
 from flask import render_template_string, jsonify
 from flask import render_template
@@ -164,12 +165,24 @@ def add_labels(project_id):
 def order_labels(project_id):
     project = Projects.query.get(int(project_id))
     if request.method == 'GET':
-        return render_template('/order_labels.html', project=project)
+        # labels need to be shown as per order
+        labels = Labels.query.filter_by(project_id=project_id).order_by('order')
+        return render_template('/order_labels.html', labels=labels, project=project)
     else:
-        # save the order here
-        for label in project.labels:
-            pass
         return redirect(url_for('show_project', project_id=project_id))
+
+
+@app.route('/project/<int:project_id>/update-labels', methods=['GET', 'POST'])
+def update_labels_order(project_id):
+    project = Projects.query.get(int(project_id))
+    if request.method == 'GET':
+        d = request.args.get('labels')
+        d = dict(request.args)
+        for label, index in d.items():
+            Labels.query.filter_by(name=label, project_id=project_id).update(
+                    {'order': index[0]})
+
+    return jsonify({'success': True})
 
 
 @app.route('/change_label', methods=['GET'])
@@ -187,11 +200,11 @@ def change_label():
 @app.route('/project/<int:project_id>', methods=['GET'])
 def show_project(project_id):
     project = Projects.query.get(int(project_id))
-    lbl_list = [label.name for label in project.labels]
+    labels = Labels.query.filter_by(project_id=project_id).order_by('order')
     repo_list = [repo.name for repo in project.repositories]
-    issue_dict = get_issue_dict(g.user, repo_list, lbl_list)
+    issue_dict = get_issue_dict(g.user, repo_list, labels)
     return render_template(
-        '/issues_list.html', label_list=lbl_list, issues_dict=issue_dict)
+        '/issues_list.html', project=project, label_list=labels, issues_dict=issue_dict)
 
 
 @app.route('/project/<int:project_id>/edit', methods=['GET', 'POST'])

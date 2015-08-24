@@ -1,6 +1,13 @@
 {% extends "base.html" %}
-{% block content %}
 
+{% block header %}
+<ul class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li><a href="/projects">Projects</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
 <ul class="list-group">
     {% for project in project_list %}
     <li class="list-group-item clearfix">

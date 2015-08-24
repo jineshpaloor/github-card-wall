@@ -1,4 +1,13 @@
 {% extends "base.html" %}
+
+{% block header %}
+<ul class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li><a href="/projects">Projects</a></li>
+  <li>Labels</li>
+</ul>
+{% endblock %}
+
 {% block content %}
 
   <h3>Select labels for project: {{ project.name }}</h3>
