@@ -82,7 +82,7 @@ def authorized(access_token):
 def index():
     if session.get('user_id', None) is None:
         return redirect('/login')
-    return render_template("index.html")
+    return redirect('/projects')
 
 
 # the scope parameter is important as it decides
