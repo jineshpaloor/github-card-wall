@@ -182,6 +182,7 @@ def update_labels_order(project_id):
             Labels.query.filter_by(name=label, project_id=project_id).update(
                     {'order': index[0]})
 
+        db_session.commit()
     return jsonify({'success': True})
 
 
