@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
-from models import Labels, Repository, Projects, Users, Base
+from models import Labels, Repository, Projects, Users, Base, Issues
 from forms import ProjectForm
 
 import logging
@@ -197,6 +197,34 @@ def change_label():
 
     return jsonify({'success' : True, 'issue_id' : issue_id})
 
+def update_issues(issue_dict, project_id):
+    for label, issue_list in issue_dict.items():
+        for issue in issue_list:
+            # check whether DB Repository exists for the project with github repo.id
+            # If not create one
+            repo = Repository.query.filter_by(project_id=project_id, github_repo_id=issue.repository.id).first()
+            if not repo:
+                repo = Repository(project_id=project_id, github_repo_id=issue.repository.id, name=issue.repository.name)
+                db_session.add(repo)
+
+            # check whether DB Issue exists for the project with DB repo.id and github issue title and body
+            # If not create one
+            # Also, we have to save the labels associated with the issues.
+            instance = Issues.query.filter_by(repository_id=repo.id, title=issue.title, body=issue.body).first()
+            if not instance:
+                db_issue = Issues(repository_id=repo.id, title=issue.title, body=issue.body)
+                # update the issue labels
+                # Get all the labels registered for the project
+                project_labels = Labels.query.filter_by(project_id=project_id)
+                label_names = [l.name for l in project_labels]
+                for lbl in issue.labels:
+                    if lbl.name in label_names:
+                        project_label = Labels.query.filter_by(project_id=project_id, name=lbl.name).first()
+                        db_issue.labels.append(project_label)
+                db_session.add(db_issue)
+    db_session.commit()
+    return True
+
 
 @app.route('/project/<int:project_id>', methods=['GET'])
 def show_project(project_id):
@@ -204,6 +232,7 @@ def show_project(project_id):
     labels = Labels.query.filter_by(project_id=project_id).order_by('order')
     repo_list = [repo.name for repo in project.repositories]
     issue_dict = get_issue_dict(g.user, repo_list, labels)
+    #update_issues(issue_dict, project_id)
     return render_template(
         '/issues_list.html', project=project, label_list=labels, issues_dict=issue_dict)
 
