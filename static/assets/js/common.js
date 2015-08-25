@@ -48,7 +48,7 @@ GithubCardWall.cardwallModule = (function(){
     var dragNdrop2 = function() {
         var elements = document.getElementsByTagName('*'), i;
         for (i in elements) {
-            if ((' ' + elements[i].className + ' ').indexOf(' list-group ') > -1)
+            if ((' ' + elements[i].className + ' ').indexOf(' my-list-group ') > -1)
             // && (element.getAttribute('id').indexOf('card-wall') == -1)
             {
                 Sortable.create(elements[i], {
@@ -57,12 +57,27 @@ GithubCardWall.cardwallModule = (function(){
                     sort : false,
                     onAdd: function(evt){
                         var element = evt.item;
+                        // console.log('label :', $(element).parents('div.my-list-group').attr('id'));
                         var issue_id = element.getAttribute('id');
                         var from_label = element.getAttribute('data-label');
-                        var to_label = '';
+                        var to_label = $(element).parents('div.my-list-group').attr('id');
                         var issue_no = element.getAttribute('data-number');
                         var repo = element.getAttribute('data-repo');
-                        //evt.from
+                        console.log("label: ", from_label, to_label, issue_no, repo);
+                        if (from_label == to_label){return false}
+
+                        $.getJSON(
+                            $SCRIPT_ROOT + '/change_label',
+                            {'issue_id' : issue_id, 'from_label': from_label, 'to_label': to_label, 'issue_no': issue_no, 'repo': repo},
+                            function(data) {
+                                $("#loader_image").addClass("hidden");
+                                if(data.success) {
+                                    alert("label changed");
+                                    $("#" + data.issue_id).attr("data-label", to_label);
+                                }
+                                else alert("operation failed. Please reload the page");
+                            }
+                        );
                     }
                 });
             }

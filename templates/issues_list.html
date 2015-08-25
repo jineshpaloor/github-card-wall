@@ -32,23 +32,25 @@
     <!--</tr>-->
     <!--</table>-->
 
-    <div id="card-wall">
+    <div id="card-wall" style="width:1000px; border:2px #bbb">
         {% for label in label_list %}
-            <div style="width:25%; float=left">{{ label.name }}
-            {% if issues_dict.get(label.name) %}
-                <ul id="{{ label.name }}" class="list-group">
-                    {% for issue in issues_dict.get(label.name) %}
-                        <li id="{{ issue.id }}" data-repo="{{ issue.repository.name }}"
-                            data-label="{{ label.name }}" data-number="{{ issue.number }}" class="list-group-item">
-                            [{{ issue.repository.name }}] #{{ issue.number }}-{{ issue.title }}
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+            <div style="position:relative; float:left; width:20%; border:1px #bbb; margin-left:2px; margin-right:2px">
+                <div style="text-align:center; color:blue; border:2px #bbb; background-color:black; color:white"><b>{{ label.name }}</b></div>
+                    <div id="{{ label.name }}" class="my-list-group">
+                        {% if issues_dict.get(label.name) %}
+                            {% for issue in issues_dict.get(label.name) %}
+                                <div id="{{ issue.id }}" data-repo="{{ issue.repository.name }}"
+                                    data-label="{{ label.name }}" data-number="{{ issue.number }}" class="my-list-group-item"
+                                     style="height:75px; width:100%; border:1px solid #bbb; margin-bottom:2px">
+                                    [{{ issue.repository.name }}] #{{ issue.number }}-{{ issue.title }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
             </div>
         {% endfor %}
      </div>
-
+     <div style="clear:both"></div>
 
 {% endblock %}
 
