@@ -1,6 +1,7 @@
 from sqlalchemy import Table, Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.schema import PrimaryKeyConstraint
 
 Base = declarative_base()
 
@@ -8,13 +9,15 @@ Base = declarative_base()
 user_projects = Table(
     'user_projects', Base.metadata,
     Column('user_id', Integer, ForeignKey('users.id')),
-    Column('project_id', Integer, ForeignKey('projects.id'))
+    Column('project_id', Integer, ForeignKey('projects.id')),
+    PrimaryKeyConstraint('user_id', 'project_id')
 )
 
 issue_labels = Table(
     'issue_labels', Base.metadata,
     Column('issues_id', Integer, ForeignKey('issues.id')),
-    Column('labels_id', Integer, ForeignKey('labels.id'))
+    Column('labels_id', Integer, ForeignKey('labels.id')),
+    PrimaryKeyConstraint('issues_id', 'labels_id')
 )
 
 
