@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 from flask import Flask, request, g, session, redirect, url_for
 from flask import render_template_string, jsonify
 from flask import render_template
@@ -212,7 +213,7 @@ def update_issues(issue_dict, project_id):
             # Also, we have to save the labels associated with the issues.
             instance = Issues.query.filter_by(repository_id=repo.id, title=issue.title, body=issue.body).first()
             if not instance:
-                db_issue = Issues(repository_id=repo.id, title=issue.title, body=issue.body)
+                db_issue = Issues(repository_id=repo.id, title=issue.title, body=issue.body, number=issue.number)
                 # update the issue labels
                 # Get all the labels registered for the project
                 project_labels = Labels.query.filter_by(project_id=project_id)
@@ -230,8 +231,15 @@ def update_issues(issue_dict, project_id):
 def show_project(project_id):
     project = Projects.query.get(int(project_id))
     labels = Labels.query.filter_by(project_id=project_id).order_by('order')
-    repo_list = [repo.name for repo in project.repositories]
-    issue_dict = get_issue_dict(g.user, repo_list, labels)
+    repo_list = [repo.id for repo in project.repositories]
+    issue_dict = defaultdict(list)
+    for repo_id in repo_list:
+        issues = Issues.query.filter_by(repository_id=repo_id)
+        for issue in issues:
+            for label in issue.labels:
+                issue_dict[label.name].append(issue)
+
+    #issue_dict = get_issue_dict(g.user, repo_list, labels)
     #update_issues(issue_dict, project_id)
     return render_template(
         '/issues_list.html', project=project, label_list=labels, issues_dict=issue_dict)
