@@ -19,10 +19,20 @@
   height: 60px;
 }
 
+.card-wall {
+    display: inline-flex;
+    min-width: 1000px;
+    width: auto !important;
+    border: 2px #bbb;
+    float: left;
+    //overflow:auto;
+}
+
 .swim-lane {
+    //display: inline-block;
     position: relative;
     float: left;
-    width: 20%;
+    width: 200px;
     height: 100%;
     border: 1px #bbb;
     margin-left: 2px;

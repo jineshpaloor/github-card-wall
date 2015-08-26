@@ -54,12 +54,10 @@ GithubCardWall.cardwallModule = (function(){
             }
         });
 
-        //var elements = document.getElementsByTagName('*'), i;
         var elements = wall.getElementsByClassName('my-list-group')
         for (var i in elements) {
         //[].forEach.call(wall.getElementsByClassName('my-list-group'), function(el){
             if ((' ' + elements[i].className + ' ').indexOf(' my-list-group ') > -1)
-            // && (element.getAttribute('id').indexOf('card-wall') == -1)
             {
                 Sortable.create(elements[i], {
                     group: 'wall',
@@ -144,7 +142,7 @@ GithubCardWall.labelorderModule = (function(){
                     function(data) {
                         $("#loader_image").addClass("hidden");
                         if(data.success) {
-                            alert("label changed");
+                            alert("label order changed");
                         }
                         else alert("operation failed. Please reload the page");
                     }
