@@ -11,7 +11,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 from models import Labels, Repository, Projects, Users, Base, Issues
-from forms import ProjectForm
+from forms import ProjectForm, ProjectLabelsForm
 
 import logging
 from github_api import get_user_login_name, get_repo_list, get_label_list, get_issue_dict, change_issue_label
@@ -108,12 +108,6 @@ def logout():
     return redirect('/login')
 
 
-@app.route('/projects')
-def projects():
-    projects = Projects.query.filter_by(author_id=g.user.id)
-    return render_template("projects.html", project_list=projects)
-
-
 @app.route('/new-project', methods=['GET', 'POST'])
 def new_project():
     form = ProjectForm(request.form)
@@ -123,7 +117,6 @@ def new_project():
             project = Projects(name=form.name.data, author_id=g.user.id)
             db_session.add(project)
             db_session.commit()
-    
             repo_name_list = []
             for repo in form.repositories.data:
                 repo_id, repo_name = repo.split('*')
@@ -134,20 +127,79 @@ def new_project():
                 db_session.add(repository)
             db_session.commit()
             return redirect('/project/{0}/labels'.format(project.id))
-    else:
-        # this is for GET request
+
+    # this is for GET request
+    form.repositories.choices = get_repo_list(g.user)
+    return render_template(
+        "new_project.html", form=form, view_url=url_for('new_project'))
+
+
+@app.route('/projects')
+def projects():
+    projects = Projects.query.filter_by(author_id=g.user.id)
+    return render_template("projects.html", project_list=projects)
+
+
+@app.route('/project/<int:project_id>/edit', methods=['GET', 'POST'])
+def edit_project(project_id):
+    project = Projects.query.get(int(project_id))
+    if request.method == 'GET':
+        form = ProjectForm(obj=project)
         form.repositories.choices = get_repo_list(g.user)
-        return render_template(
-            "new_project.html", form=form, view_url=url_for('new_project'))
+        form.repositories.data = ['{0}*{1}'.format(repo.github_repo_id, repo.name)
+                                  for repo in project.repositories]
+
+        return render_template('/new_project.html', form=form,
+                               view_url=url_for('edit_project', project_id=project_id))
+    else:
+        # for POST method type
+        form = ProjectForm(request.form)
+
+        new_repo_id_name_dict = dict([repo.split('*') for repo in form.repositories.data])
+        new_repos = new_repo_id_name_dict.values()
+
+
+        project_repos = [repo.name for repo in project.repositories]
+
+        obsolete_repos = set(project_repos) - set(new_repos)
+        repos_to_be_added = set(new_repos) - set(project_repos)
+
+        # remove obsolete repos
+        for repo_name in obsolete_repos:
+            repo_objects = Repository.query.filter_by(name=repo_name, project_id=project.id)
+            for repo in repo_objects:
+                db_session.delete(repo)
+        db_session.commit()
+
+        # create new repos
+        for repo_name in repos_to_be_added:
+            repo_id = [id for (id, name) in new_repo_id_name_dict.items() if name == repo_name]
+            repo_object = Repository(name=repo_name, github_repo_id=repo_id[0], project_id=project.id)
+            db_session.add(repo_object)
+        db_session.commit()
+
+        return render_template("select_labels.html", project=project,
+                               label_list=get_label_list(g.user, new_repos))
+
+
+@app.route('/project/<int:project_id>/delete', methods=['POST'])
+def delete_project(project_id):
+    project = Projects.query.get(int(project_id))
+    db_session.delete(project)
+    db_session.commit()
+
+    return redirect('/projects')
 
 
 @app.route('/project/<int:project_id>/labels', methods=['GET', 'POST'])
 def add_labels(project_id):
     if request.method == 'GET':
         project = Projects.query.get(int(project_id))
-        return render_template(
-            "select_labels.html", project=project,
-            label_list=get_label_list(g.user, [repo.name for repo in project.repositories]))
+        labels = get_label_list(g.user, [repo.name for repo in project.repositories])
+        labels_form = ProjectLabelsForm()
+        labels_form.labels.choices = [(l, l) for l in labels]
+        labels_form.labels.data = [l.name for l in project.labels]
+        return render_template("/select_labels.html", project=project, form=labels_form)
     else:
         project = Projects.query.get(project_id)
         # if this is editing an existing project, delete existing labels
@@ -227,73 +279,32 @@ def update_issues(issue_dict, project_id):
     return True
 
 
+def get_project_issue_dict(project_id, DB=True):
+    project = Projects.query.get(int(project_id))
+    if DB:
+        repo_list = [repo.id for repo in project.repositories]
+        issue_dict = defaultdict(list)
+        for repo_id in repo_list:
+            issues = Issues.query.filter_by(repository_id=repo_id)
+            for issue in issues:
+                for label in issue.labels:
+                    issue_dict[label.name].append(issue)
+    else:
+        repo_list = [repo.name for repo in project.repositories]
+        labels = Labels.query.filter_by(project_id=project_id).order_by('order')
+        issue_dict = get_issue_dict(g.user, repo_list, labels)
+        update_issues(issue_dict, project_id)
+    return issue_dict
+
+
 @app.route('/project/<int:project_id>', methods=['GET'])
 def show_project(project_id):
     project = Projects.query.get(int(project_id))
     labels = Labels.query.filter_by(project_id=project_id).order_by('order')
-    repo_list = [repo.id for repo in project.repositories]
-    issue_dict = defaultdict(list)
-    for repo_id in repo_list:
-        issues = Issues.query.filter_by(repository_id=repo_id)
-        for issue in issues:
-            for label in issue.labels:
-                issue_dict[label.name].append(issue)
-
-    #issue_dict = get_issue_dict(g.user, repo_list, labels)
-    #update_issues(issue_dict, project_id)
+    issue_dict = get_project_issue_dict(project_id, DB=False)
     return render_template(
         '/issues_list.html', project=project, label_list=labels, issues_dict=issue_dict)
 
-
-@app.route('/project/<int:project_id>/edit', methods=['GET', 'POST'])
-def edit_project(project_id):
-    project = Projects.query.get(int(project_id))
-    if request.method == 'GET':
-        form = ProjectForm(obj=project)
-        form.repositories.choices = get_repo_list(g.user)
-        form.repositories.data = ['{0}*{1}'.format(repo.github_repo_id, repo.name)
-                                  for repo in project.repositories]
-
-        return render_template('/new_project.html', form=form,
-                               view_url=url_for('edit_project', project_id=project_id))
-    else:
-        # for POST method type
-        form = ProjectForm(request.form)
-
-        new_repo_id_name_dict = dict([repo.split('*') for repo in form.repositories.data])
-        new_repos = new_repo_id_name_dict.values()
-
-
-        project_repos = [repo.name for repo in project.repositories]
-
-        obsolete_repos = set(project_repos) - set(new_repos)
-        repos_to_be_added = set(new_repos) - set(project_repos)
-
-        # remove obsolete repos
-        for repo_name in obsolete_repos:
-            repo_objects = Repository.query.filter_by(name=repo_name, project_id=project.id)
-            for repo in repo_objects:
-                db_session.delete(repo)
-        db_session.commit()
-
-        # create new repos
-        for repo_name in repos_to_be_added:
-            repo_id = [id for (id, name) in new_repo_id_name_dict.items() if name == repo_name]
-            repo_object = Repository(name=repo_name, github_repo_id=repo_id[0], project_id=project.id)
-            db_session.add(repo_object)
-        db_session.commit()
-
-        return render_template("select_labels.html", project=project,
-                               label_list=get_label_list(g.user, new_repos))
-
-
-@app.route('/project/<int:project_id>/delete', methods=['POST'])
-def delete_project(project_id):
-    project = Projects.query.get(int(project_id))
-    db_session.delete(project)
-    db_session.commit()
-
-    return redirect('/projects')
 
 if __name__ == '__main__':
     import os
