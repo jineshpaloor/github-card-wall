@@ -18,3 +18,28 @@
   left: 20px;
   height: 60px;
 }
+
+.swim-lane {
+    position: relative;
+    float: left;
+    width: 20%;
+    height: 100%;
+    border: 1px #bbb;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.swim-lane-title {
+    text-align: center;
+    color: blue;
+    border: 2px #bbb;
+    background-color: black;
+    color:white;
+}
+
+.my-list-group-item {
+    height: 75px;
+    width: 100%;
+    border: 1px solid #bbb;
+    margin-bottom: 2px;
+}

@@ -46,8 +46,18 @@ GithubCardWall.cardwallModule = (function(){
 
     /** using Sortable library */
     var dragNdrop2 = function() {
-        var elements = document.getElementsByTagName('*'), i;
-        for (i in elements) {
+        var wall = document.getElementById('card-wall');
+        Sortable.create(wall, {
+            draggable: '.swim-lane',
+            handle: '.swim-lane-title',
+            onUpdate: function(evt) {
+            }
+        });
+
+        //var elements = document.getElementsByTagName('*'), i;
+        var elements = wall.getElementsByClassName('my-list-group')
+        for (var i in elements) {
+        //[].forEach.call(wall.getElementsByClassName('my-list-group'), function(el){
             if ((' ' + elements[i].className + ' ').indexOf(' my-list-group ') > -1)
             // && (element.getAttribute('id').indexOf('card-wall') == -1)
             {
@@ -55,6 +65,7 @@ GithubCardWall.cardwallModule = (function(){
                     group: 'wall',
                     animation: 100,
                     sort : false,
+                    draggable : '.my-list-group-item',
                     onAdd: function(evt){
                         var element = evt.item;
                         // console.log('label :', $(element).parents('div.my-list-group').attr('id'));
