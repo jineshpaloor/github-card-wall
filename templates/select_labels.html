@@ -9,23 +9,19 @@
 {% endblock %}
 
 {% block content %}
-
   <h3>Select labels for project: {{ project.name }}</h3>
   <div class="row">
     <div class="col-lg-6 center-block">
       <div class="well bs-component">
       <form class="form-horizontal" method="POST" action="{{ url_for("add_labels", project_id=project.id) }}">
-
         <input type="hidden" name="project" value="{{ project.name }}"/>
-
         <div class="form-group">
-          <label class="col-lg-2 control-label" for="labels">Labels</label>
+          {{ form.labels.label(class="col-lg-2 control-label") }}
           <div class="col-lg-10">
-            <select class="form-control" id="repositories" multiple="multiple" name="labels">
-                {% for label_name in label_list %}
-                    <option value="{{ label_name }}">{{ label_name }}</option>
-                {% endfor %}
-            </select>
+            {{ form.labels(class="form-control") }}
+            {% if form.labels.errors %}
+                <ul class="errors">{% for error in form.labels.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+            {% endif %}
           </div>
         </div>
 
@@ -40,5 +36,4 @@
       </div>
     </div>
   </div>
-
 {% endblock %}
