@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, ForeignKey
+from sqlalchemy import Table, Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.schema import PrimaryKeyConstraint
@@ -50,7 +50,7 @@ class Repository(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100))
     github_repo_id = Column(Integer)
-    project_id = Column(Integer, ForeignKey('projects.id'))
+    project_id = Column(Integer, ForeignKey('projects.id'), nullable=False)
 
     issues = relationship("Issues", backref='repository')
 
@@ -62,9 +62,11 @@ class Issues(Base):
     title = Column(String(100))
     body = Column(String)
     number = Column(Integer)
-    repository_id = Column(Integer, ForeignKey('repository.id'))
+    repository_id = Column(Integer, ForeignKey('repository.id'), nullable=False)
 
     labels = relationship('Labels', secondary=issue_labels, backref='issues')
+
+    UniqueConstraint(number, repository_id)
 
 
 class Labels(Base):
@@ -74,4 +76,4 @@ class Labels(Base):
     name = Column(String)
     color = Column(String)
     order = Column(Integer)
-    project_id = Column(Integer, ForeignKey('projects.id'))
+    project_id = Column(Integer, ForeignKey('projects.id'), nullable=False)

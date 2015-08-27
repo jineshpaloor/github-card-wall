@@ -246,47 +246,48 @@ def change_label():
     to_label = request.args.get('to_label')
     issue_number = request.args.get('issue_no')
     repo_name = request.args.get('repo')
+    print '+++++++++++ from : %s, to : %s' %(from_label, to_label)
     change_issue_label(g.user, from_label, to_label, repo_name, issue_number)
 
     return jsonify({'success' : True, 'issue_id' : issue_id})
 
 def update_issues(issue_dict, project_id):
-    for label, issue_list in issue_dict.items():
-        for issue in issue_list:
-            # check whether DB Repository exists for the project with github repo.id
-            # If not create one
-            repo = Repository.query.filter_by(project_id=project_id, github_repo_id=issue.repository.id).first()
-            if not repo:
-                repo = Repository(project_id=project_id, github_repo_id=issue.repository.id, name=issue.repository.name)
-                db_session.add(repo)
+    for label, gh_issue_list in issue_dict.items():
+        for gh_issue in gh_issue_list:
+            # get the repository object for this issue
+            repo = Repository.query.filter_by(project_id=project_id, github_repo_id=gh_issue.repository.id).first()
 
-            # check whether DB Issue exists for the project with DB repo.id and github issue title and body
+            # check whether DB Issue exists for the project with DB repo.id and github issue number
             # If not create one
             # Also, we have to save the labels associated with the issues.
-            instance = Issues.query.filter_by(repository_id=repo.id, title=issue.title, body=issue.body).first()
+            instance = Issues.query.filter_by(repository_id=repo.id, number=gh_issue.number).first()
             if not instance:
-                db_issue = Issues(repository_id=repo.id, title=issue.title, body=issue.body, number=issue.number)
+                db_issue = Issues(repository_id=repo.id, title=gh_issue.title, body=gh_issue.body, number=gh_issue.number)
                 # update the issue labels
                 # Get all the labels registered for the project
                 project_labels = Labels.query.filter_by(project_id=project_id)
                 label_names = [l.name for l in project_labels]
-                for lbl in issue.labels:
-                    if lbl.name in label_names:
-                        project_label = Labels.query.filter_by(project_id=project_id, name=lbl.name).first()
+                for gh_lbl in gh_issue.labels:
+                    if gh_lbl.name in label_names:
+                        project_label = Labels.query.filter_by(project_id=project_id, name=gh_lbl.name).first()
                         db_issue.labels.append(project_label)
                 db_session.add(db_issue)
-    db_session.commit()
+        db_session.commit()
     return True
 
 
 def get_project_issue_dict(project_id, DB=True):
     project = Projects.query.get(int(project_id))
+    issue_dict = defaultdict(list)
     if DB:
-        repo_list = [repo.id for repo in project.repositories]
-        issue_dict = defaultdict(list)
-        for repo_id in repo_list:
-            issues = Issues.query.filter_by(repository_id=repo_id)
-            for issue in issues:
+        # repo_list = [repo.id for repo in project.repositories]
+        # for repo_id in repo_list:
+        #     issues = Issues.query.filter_by(repository_id=repo_id)
+        #     for issue in issues:
+        #         for label in issue.labels:
+        #             issue_dict[label.name].append(issue)
+        for repo in project.repositories:
+            for issue in repo.issues:
                 for label in issue.labels:
                     issue_dict[label.name].append(issue)
     else:
@@ -301,7 +302,10 @@ def get_project_issue_dict(project_id, DB=True):
 def show_project(project_id):
     project = Projects.query.get(int(project_id))
     labels = Labels.query.filter_by(project_id=project_id).order_by('order')
-    issue_dict = get_project_issue_dict(project_id, DB=False)
+    issue_dict = get_project_issue_dict(project_id, DB=True)
+    # issues = issue_dict.get('Test Label')
+    # for issue in issues:
+    #     print '-----------', issue.id, issue.repository, issue.number, issue.labels
     return render_template(
         '/issues_list.html', project=project, label_list=labels, issues_dict=issue_dict)
 
