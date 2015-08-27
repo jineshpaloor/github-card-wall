@@ -1,5 +1,6 @@
 from github import Github
 from collections import defaultdict
+import urllib
 import logging
 
 
@@ -56,15 +57,15 @@ def get_issue_dict(user, repo_list, lbl_list):
     return issues_dict
 
 
-def change_issue_label(user, lbl_from, lbl_to, repo_name, issue_id):
+def change_issue_label(user, lbl_from, lbl_to, repo_name, issue_number):
     github = Github(login_or_token=user.github_access_token)
     git_user = github.get_user()
     repo = get_a_repo(git_user, repo_name)
 
-    issue = repo.get_issue(int(issue_id))
+    issue = repo.get_issue(int(issue_number))
 
     # remove the from label
-    issue.remove_from_labels(str(lbl_from))
+    issue.remove_from_labels(urllib.quote(lbl_from))
 
     # check if new label exists in the repository
     # get all labels from this repository
