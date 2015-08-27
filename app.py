@@ -11,10 +11,11 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 from models import Labels, Repositories, Projects, Users, Base, Issues
-from forms import ProjectForm, ProjectLabelsForm
+from forms import ProjectForm, ProjectLabelsForm, ProjectIssueForm
 
 import logging
-from github_api import get_user_login_name, get_repo_list, get_label_list, get_issue_dict, change_issue_label
+from github_api import get_user_login_name, get_repo_list, get_label_list, \
+    get_issue_dict, change_issue_label, create_new_issue
 
 # setup flask
 app = Flask(__name__)
@@ -309,6 +310,25 @@ def show_project(project_id):
     return render_template(
         '/issues_list.html', project=project, label_list=labels, issues_dict=issue_dict)
 
+
+@app.route('/project/<int:project_id>/label/<label_name>/issue/new', methods=['GET','POST'])
+def new_issue(project_id, label_name):
+    form = ProjectIssueForm(request.form)
+
+    project = Projects.query.get(int(project_id))
+
+    if request.method == 'POST':
+        repo_id, repo_name = form.repository.data.split('*')
+        issue = create_new_issue(user=g.user, repo_name=repo_name,
+                                 title=form.title.data, body=form.body.data, label_name=label_name)
+
+        return redirect(url_for('show_project', project_id=project_id))
+    else:
+        form.repository.choices = [('{0}*{1}'.format(repo.id, repo.name), repo.name)
+                                   for repo in project.repositories]
+        form.label.data = label_name
+        return render_template('/create_issue.html', form=form,
+                               create_url=url_for('new_issue', project_id=project_id, label_name=label_name))
 
 if __name__ == '__main__':
     import os

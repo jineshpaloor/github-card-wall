@@ -35,17 +35,22 @@
     <div id="card-wall" class="card-wall">
         {% for label in label_list %}
             <div class="swim-lane">
-                <div class="swim-lane-title"><b>{{ label.name }}</b></div>
-                    <div id="{{ label.name }}" class="my-list-group">
-                        {% if issues_dict.get(label.name) %}
-                            {% for issue in issues_dict.get(label.name) %}
-                                <div id="{{ issue.id }}" data-repo="{{ issue.repository.name }}"
-                                    data-label="{{ label.name }}" data-number="{{ issue.number }}" class="my-list-group-item">
-                                    [{{ issue.repository.name }}] #{{ issue.number }}-{{ issue.title }}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
+                <div class="swim-lane-title">
+                    <b>{{ label.name }}</b>
+                </div>
+                <div class="swim-lane-plus">
+                    <a href="/project/{{ project.id }}/label/{{ label.name }}/issue/new"><b>+</b></a>
+                </div>
+                <div id="{{ label.name }}" class="my-list-group">
+                    {% if issues_dict.get(label.name) %}
+                        {% for issue in issues_dict.get(label.name) %}
+                        <div id="{{ issue.id }}" data-repo="{{ issue.repository.name }}"
+                             data-label="{{ label.name }}" data-number="{{ issue.number }}" class="card">
+                            [{{ issue.repository.name }}] #{{ issue.number }}-{{ issue.title }}
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
             </div>
         {% endfor %}
      </div>

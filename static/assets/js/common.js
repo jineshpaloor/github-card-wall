@@ -63,7 +63,7 @@ GithubCardWall.cardwallModule = (function(){
                     group: 'wall',
                     animation: 100,
                     sort : false,
-                    draggable : '.my-list-group-item',
+                    draggable : '.card',
                     onAdd: function(evt){
                         var element = evt.item;
                         // console.log('label :', $(element).parents('div.my-list-group').attr('id'));

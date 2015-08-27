@@ -82,5 +82,21 @@ def change_issue_label(user, lbl_from, lbl_to, repo_name, issue_number):
 
     return new_label
 
-# def get_repository(user, github, repo_name):
-#     return github.get_repo(user.username + '/' + repo_name)
+
+def create_new_issue(user, repo_name, title, body, label_name):
+    print 'inside create_new_issue : ', repo_name, label_name
+
+    github = Github(login_or_token=user.github_access_token)
+    git_user = github.get_user()
+    repo = get_a_repo(git_user, repo_name)
+
+    label_objects = [lbl for lbl in repo.get_labels() if lbl.name == label_name]
+
+    # check if this label exists in this repo, if not create one
+    if len(label_objects) == 0:
+        print 'creating new label : ', label_name
+        new_label = repo.create_label(label_name, "00ff00")
+        label_objects = [new_label]
+
+    issue = repo.create_issue(title=title, body=body, labels=label_objects)
+    return issue
