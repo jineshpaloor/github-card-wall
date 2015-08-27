@@ -10,7 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
-from models import Labels, Repository, Projects, Users, Base, Issues
+from models import Labels, Repositories, Projects, Users, Base, Issues
 from forms import ProjectForm, ProjectLabelsForm
 
 import logging
@@ -121,7 +121,7 @@ def new_project():
             for repo in form.repositories.data:
                 repo_id, repo_name = repo.split('*')
                 repo_name_list.append(repo_name)
-                repository = Repository(
+                repository = Repositories(
                     name=repo_name, github_repo_id=repo_id, 
                     project_id=project.id)
                 db_session.add(repository)
@@ -166,7 +166,7 @@ def edit_project(project_id):
 
         # remove obsolete repos
         for repo_name in obsolete_repos:
-            repo_objects = Repository.query.filter_by(name=repo_name, project_id=project.id)
+            repo_objects = Repositories.query.filter_by(name=repo_name, project_id=project.id)
             for repo in repo_objects:
                 db_session.delete(repo)
         db_session.commit()
@@ -174,7 +174,7 @@ def edit_project(project_id):
         # create new repos
         for repo_name in repos_to_be_added:
             repo_id = [id for (id, name) in new_repo_id_name_dict.items() if name == repo_name]
-            repo_object = Repository(name=repo_name, github_repo_id=repo_id[0], project_id=project.id)
+            repo_object = Repositories(name=repo_name, github_repo_id=repo_id[0], project_id=project.id)
             db_session.add(repo_object)
         db_session.commit()
 
@@ -255,7 +255,7 @@ def update_issues(issue_dict, project_id):
     for label, gh_issue_list in issue_dict.items():
         for gh_issue in gh_issue_list:
             # get the repository object for this issue
-            repo = Repository.query.filter_by(project_id=project_id, github_repo_id=gh_issue.repository.id).first()
+            repo = Repositories.query.filter_by(project_id=project_id, github_repo_id=gh_issue.repository.id).first()
 
             # check whether DB Issue exists for the project with DB repo.id and github issue number
             # If not create one
@@ -302,7 +302,7 @@ def get_project_issue_dict(project_id, DB=True):
 def show_project(project_id):
     project = Projects.query.get(int(project_id))
     labels = Labels.query.filter_by(project_id=project_id).order_by('order')
-    issue_dict = get_project_issue_dict(project_id, DB=True)
+    issue_dict = get_project_issue_dict(project_id, DB=False)
     # issues = issue_dict.get('Test Label')
     # for issue in issues:
     #     print '-----------', issue.id, issue.repository, issue.number, issue.labels

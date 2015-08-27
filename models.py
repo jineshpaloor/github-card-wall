@@ -15,9 +15,9 @@ user_projects = Table(
 
 issue_labels = Table(
     'issue_labels', Base.metadata,
-    Column('issues_id', Integer, ForeignKey('issues.id')),
-    Column('labels_id', Integer, ForeignKey('labels.id')),
-    PrimaryKeyConstraint('issues_id', 'labels_id')
+    Column('issue_id', Integer, ForeignKey('issues.id')),
+    Column('label_id', Integer, ForeignKey('labels.id')),
+    PrimaryKeyConstraint('issue_id', 'label_id')
 )
 
 
@@ -40,19 +40,19 @@ class Projects(Base):
     name = Column(String)
     author_id = Column(Integer, ForeignKey('users.id'))
 
-    repositories = relationship("Repository", cascade='all, delete-orphan', backref='projects')
+    repositories = relationship("Repositories", cascade='all, delete-orphan', backref='projects')
     labels = relationship("Labels", cascade='all, delete-orphan', backref='projects')
 
 
-class Repository(Base):
-    __tablename__ = 'repository'
+class Repositories(Base):
+    __tablename__ = 'repositories'
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100))
     github_repo_id = Column(Integer)
     project_id = Column(Integer, ForeignKey('projects.id'), nullable=False)
 
-    issues = relationship("Issues", backref='repository')
+    issues = relationship("Issues", cascade='all, delete-orphan', backref='repositories')
 
 
 class Issues(Base):
@@ -62,7 +62,7 @@ class Issues(Base):
     title = Column(String(100))
     body = Column(String)
     number = Column(Integer)
-    repository_id = Column(Integer, ForeignKey('repository.id'), nullable=False)
+    repository_id = Column(Integer, ForeignKey('repositories.id'), nullable=False)
 
     labels = relationship('Labels', secondary=issue_labels, backref='issues')
 
