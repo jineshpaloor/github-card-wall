@@ -47,6 +47,10 @@
     color:white;
 }
 
+.my-list-group {
+    height: 75px;
+}
+
 .my-list-group-item {
     height: 75px;
     width: 100%;
