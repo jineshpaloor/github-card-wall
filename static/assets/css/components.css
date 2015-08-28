@@ -41,8 +41,8 @@
 
 .swim-lane-title {
     float: left;
-    width: 80%;
-    text-align: left;
+    width: 100%;
+    text-align: center;
     //border: 2px #bbb;
     background-color: black;
     color: white;
@@ -66,4 +66,30 @@
     width: 100%;
     border: 1px solid #bbb;
     margin-bottom: 2px;
+}
+
+.card-title {
+    float: left;
+    min-height: 10px;
+    width: 100%;
+    font-size: 12px;
+    //text-align: center;
+    background-color: grey;
+    color: black;
+}
+
+.card-title-bar {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: center;
+    padding-left: 15px;
+    padding-right: 25px;
+}
+
+.card-body {
+    float: left;
+    width: 100%;
+    font-size: 9px;
+    text-align: left;
 }
