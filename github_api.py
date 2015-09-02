@@ -53,29 +53,37 @@ def get_issue_dict(user, repo_list, lbl_list):
 
 
 def change_issue_label(user, lbl_from, lbl_to, repo_name, issue_number):
+    # retrieve Github objects
     github = Github(login_or_token=user.github_access_token)
     git_user = github.get_user()
     repo = get_a_repo(git_user, repo_name)
 
+    # retrieve the issue
     issue = repo.get_issue(int(issue_number))
 
-    # remove the from label
-    issue.remove_from_labels(urllib.quote(lbl_from))
-
-    # check if new label exists in the repository
-    # get all labels from this repository
-    labels = [label for label in repo.get_labels()]
-
-    if any(filter(lambda l:l.name == lbl_to, labels)):
-        # get the label object
-        new_label = repo.get_label(lbl_to)
+    # check if the destination label is DONE
+    if lbl_to == "DONE":
+        # change the status of the issue to close
+        print 'inside DONE part : calling edit() '
+        issue.edit(state='closed')
     else:
-        # create the new label in repository
-        new_label = repo.create_label(lbl_to, "00ff00")
+        # remove the from label
+        issue.remove_from_labels(urllib.quote(lbl_from))
 
-    issue.add_to_labels(new_label)
+        # check if new label exists in the repository
+        # get all labels from this repository
+        labels = [label for label in repo.get_labels()]
 
-    return new_label
+        if any(filter(lambda l:l.name == lbl_to, labels)):
+            # get the label object
+            new_label = repo.get_label(lbl_to)
+        else:
+            # create the new label in repository
+            new_label = repo.create_label(lbl_to, "00ff00")
+
+        issue.add_to_labels(new_label)
+
+        return new_label
 
 
 def create_new_issue(user, repo_name, title, body, label_name):

@@ -82,7 +82,11 @@ GithubCardWall.cardwallModule = (function(){
                                 $("#loader_image").addClass("hidden");
                                 if(data.success) {
                                     alert("label changed");
-                                    $("#" + data.issue_id).attr("data-label", to_label);
+                                    if (to_label == "DONE") {
+                                        $("#" + data.issue_id).addClass("hidden");
+                                    } else {
+                                        $("#" + data.issue_id).attr("data-label", to_label);
+                                    }
                                 }
                                 else alert("operation failed. Please reload the page");
                             }
