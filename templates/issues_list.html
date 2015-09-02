@@ -53,6 +53,9 @@
                             <div class="card-body">
                                 {{ issue.body }}
                             </div>
+                            <div class="card-footer" title="{{ issue.repository.name }}">
+                                <b>{{ issue.repository.name }}</b>
+                            </div>
                         </div>
                         {% endfor %}
                     {% endif %}

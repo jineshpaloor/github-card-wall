@@ -64,7 +64,7 @@
     float: left;
     min-height: 50px;
     width: 100%;
-    border: 1px solid #bbb;
+    border: 2px solid #bbb;
     margin-bottom: 2px;
 }
 
@@ -74,7 +74,7 @@
     width: 100%;
     font-size: 12px;
     //text-align: center;
-    background-color: grey;
+    background-color: #A0A0A0;
     color: black;
 }
 
@@ -92,4 +92,16 @@
     width: 100%;
     font-size: 9px;
     text-align: left;
+}
+
+.card-footer {
+    width: 100%;
+    min-height: 10px;
+    font-size: 12px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: center;
+    background-color: #F0F0F0;
+    color: black;
 }

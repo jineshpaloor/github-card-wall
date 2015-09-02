@@ -13,6 +13,7 @@ from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GI
 from models import Labels, Repositories, Projects, Users, Base, Issues
 from forms import ProjectForm, ProjectLabelsForm, ProjectIssueForm
 
+from datetime import datetime
 import logging
 from github_api import get_user_login_name, get_repo_list, get_label_list, \
     get_issue_dict, change_issue_label, create_new_issue
@@ -252,17 +253,25 @@ def change_label():
 
     return jsonify({'success' : True, 'issue_id' : issue_id})
 
+
 def update_issues(issue_dict, project_id):
+    repo_dict = {}
     for label, gh_issue_list in issue_dict.items():
         for gh_issue in gh_issue_list:
             # get the repository object for this issue
-            repo = Repositories.query.filter_by(project_id=project_id, github_repo_id=gh_issue.repository.id).first()
-
+            print 'b4 finding repo : ', datetime.now()
+            repo = repo_dict.get(gh_issue.repository.id)
+            if repo is None:
+                print 'accessing db  : ', datetime.now()
+                repo = Repositories.query.filter_by(project_id=project_id, github_repo_id=gh_issue.repository.id).first()
+                repo_dict.setdefault(gh_issue.repository.id, repo)
+            print 'af finding repo : ', datetime.now()
             # check whether DB Issue exists for the project with DB repo.id and github issue number
             # If not create one
             # Also, we have to save the labels associated with the issues.
             instance = Issues.query.filter_by(repository_id=repo.id, number=gh_issue.number).first()
             if not instance:
+                print 'creating new issue : ', datetime.now()
                 db_issue = Issues(repository_id=repo.id, title=gh_issue.title, body=gh_issue.body, number=gh_issue.number)
                 # update the issue labels
                 # Get all the labels registered for the project
@@ -273,40 +282,37 @@ def update_issues(issue_dict, project_id):
                         project_label = Labels.query.filter_by(project_id=project_id, name=gh_lbl.name).first()
                         db_issue.labels.append(project_label)
                 db_session.add(db_issue)
+        print 'before commit : ', datetime.now()
         db_session.commit()
+        print 'after commit : ', datetime.now()
     return True
 
 
-def get_project_issue_dict(project_id, DB=True):
-    project = Projects.query.get(int(project_id))
+def get_project_issue_dict(project, DB=True):
     issue_dict = defaultdict(list)
     if DB:
-        # repo_list = [repo.id for repo in project.repositories]
-        # for repo_id in repo_list:
-        #     issues = Issues.query.filter_by(repository_id=repo_id)
-        #     for issue in issues:
-        #         for label in issue.labels:
-        #             issue_dict[label.name].append(issue)
         for repo in project.repositories:
             for issue in repo.issues:
                 for label in issue.labels:
                     issue_dict[label.name].append(issue)
     else:
         repo_list = [repo.name for repo in project.repositories]
-        labels = Labels.query.filter_by(project_id=project_id).order_by('order')
+        labels = Labels.query.filter_by(project_id=project.id).order_by('order')
         issue_dict = get_issue_dict(g.user, repo_list, labels)
-        update_issues(issue_dict, project_id)
+        print 'calling update_issues : ', datetime.now()
+        #update_issues(issue_dict, project.id)
+        print 'after update_issues : ', datetime.now()
     return issue_dict
 
 
 @app.route('/project/<int:project_id>', methods=['GET'])
 def show_project(project_id):
+    print 'inside show : ', datetime.now()
     project = Projects.query.get(int(project_id))
     labels = Labels.query.filter_by(project_id=project_id).order_by('order')
-    issue_dict = get_project_issue_dict(project_id, DB=False)
-    # issues = issue_dict.get('Test Label')
-    # for issue in issues:
-    #     print '-----------', issue.id, issue.repository, issue.number, issue.labels
+    print 'got labels : ', datetime.now()
+    issue_dict = get_project_issue_dict(project, DB=False)
+    print 'leaving show : ', datetime.now()
     return render_template(
         '/issues_list.html', project=project, label_list=labels, issues_dict=issue_dict)
 

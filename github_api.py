@@ -3,7 +3,6 @@ from collections import defaultdict
 import urllib
 import logging
 
-
 def get_user_login_name(access_token):
     github = Github(login_or_token=access_token)
     return github.get_user().login
@@ -33,10 +32,6 @@ def get_label_list(user, repo_name_list):
         repo = get_a_repo(git_user, repo_name)
         for lbl in repo.get_labels():
             label_list.add(lbl.name)
-        #repo = git_user.get_repos(user.username+'/'+repo_name)
-        # lbl_list = [lbl for lbl in repo.get_labels()]
-        # for lbl in lbl_list:
-        #     label_list.add(lbl.name)
     return label_list
 
 
