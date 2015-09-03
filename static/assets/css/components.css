@@ -105,3 +105,8 @@
     background-color: #F0F0F0;
     color: black;
 }
+
+.create_issue:hover {
+    cursor: pointer;
+    cursor: hand;
+}

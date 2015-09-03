@@ -97,8 +97,25 @@ GithubCardWall.cardwallModule = (function(){
         }
     };
 
+    var createIssue = function(){
+        $(".create_issue").on('click', function(e) {
+            e.preventDefault();
+
+            var issue_form = $('#form_create_issue');
+            var label_name = $(this).data('labelname');
+
+            $("#label").val(label_name);
+            $('#modal_new_issue').removeClass('hide');
+            $('#modal_new_issue').modal('show').one('click', '#submit', function (e) {
+                //console.log('submit button clicked .... ');
+                issue_form.trigger('submit');
+            });
+        });
+    };
+
     var init = function(){
         dragNdrop2();
+        createIssue();
     };
     // return an object (this is available globally)
     return {

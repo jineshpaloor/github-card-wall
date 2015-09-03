@@ -9,35 +9,16 @@
 {% endblock %}
 
 {% block content %}
-  <h3>{{ project.name }}</h3>
-    <!--<table class="table table-responsive" id="card-wall">-->
-        <!--<tr>-->
-        <!--{% for label in label_list %}-->
-        <!--<td id="{{ label.name }}" class="droppable issue_cell">-->
-            <!--<div class="panel panel-default">-->
-                <!--<div style="color:{{ label.color }}" class="panel-heading">{{ label.name }}</div>-->
-            <!--</div>-->
-            <!--{% if issues_dict.get(label.name) %}-->
-                <!--<ul id="{{ label.name }}" class="list-group">-->
-                    <!--{% for issue in issues_dict.get(label.name) %}-->
-                        <!--<li id="{{ issue.id }}" data-repo="{{ issue.repository.name }}"-->
-                            <!--data-label="{{ label.name }}" data-number="{{ issue.number }}" class="list-group-item">-->
-                            <!--[{{ issue.repository.name }}] #{{ issue.number }}-{{ issue.title }}-->
-                        <!--</li>-->
-                    <!--{% endfor %}-->
-                <!--</ul>-->
-            <!--{% endif %}-->
-            <!--</td>-->
-        <!--{% endfor %}-->
-    <!--</tr>-->
-    <!--</table>-->
-
+    <h3>{{ project.name }}</h3>
     <div id="card-wall" class="card-wall">
         {% for label in label_list %}
             <div class="swim-lane">
                 <div class="swim-lane-title">
                     <div class="pull-right">
-                        <a href="/project/{{ project.id }}/label/{{ label.name }}/issue/new"><b>+</b></a>
+                        <!--<a href="/project/{{ project.id }}/label/{{ label.name }}/issue/new"><b>+</b></a>-->
+                        <a class="create_issue" data-labelname="{{ label.name }}"><b>+</b>
+                            <!--<span class="glyphicon glyphicon-plus" style="background color:black; color:white; padding-right:5px"></span>-->
+                        </a>
                     </div>
                     <div class="pull center"><b>{{ label.name }}</b></div>
                 </div>
@@ -70,8 +51,77 @@
             <div id="DONE" class="my-list-group">
             </div>
         </div>
-     </div>
-     <div style="clear:both"></div>
+    </div>
+    <div style="clear:both"></div>
+
+    <!-- for creating new issue -->
+    <div class="modal fade hide" id="modal_new_issue">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">Create new issue</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="form_create_issue" class="form-horizontal" method="POST" action="{{ create_url }}">
+
+                        <div class="form-group">
+                            {{ form.title.label(class="col-lg-2 control-label") }}
+                            <div class="col-lg-10">
+                                {{ form.title(class="form-control") }}
+                                {% if form.title.errors %}
+                                    <ul class="errors">{% for error in form.title.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.body.label(class="col-lg-2 control-label") }}
+                            <div class="col-lg-10">
+                                {{ form.body(class="form-control") }}
+                                {% if form.body.errors %}
+                                    <ul class="errors">{% for error in form.body.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.label.label(class="col-lg-2 control-label") }}
+                            <div class="col-lg-10">
+                                {{ form.label(class="form-control", readonly=true) }}
+                                {% if form.label.errors %}
+                                    <ul class="errors">{% for error in form.label.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.repository.label(class="col-lg-2 control-label") }}
+                            <div class="col-lg-10">
+                                {{ form.repository(class="form-control") }}
+                                {% if form.repository.errors %}
+                                    <ul class="errors">{% for error in form.repository.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!--<div class="form-group">-->
+                            <!--<div class="col-lg-10 col-lg-offset-2">-->
+                                <!--<button id="cancel" type="reset" class="btn btn-default">Cancel</button>-->
+                                <!--<button id="submit" type="submit" class="btn btn-primary">Submit</button>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submit">Create Issue</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}
 
