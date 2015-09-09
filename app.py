@@ -12,6 +12,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 from models import Labels, Repositories, Projects, Users, Base, Issues
 from forms import ProjectForm, ProjectLabelsForm, ProjectIssueForm
+from decorator import login_required
 
 from datetime import datetime
 import logging
@@ -21,7 +22,7 @@ from github_api import get_user_login_name, get_repo_list, get_label_list, \
 # setup flask
 app = Flask(__name__)
 app.config.from_object(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/cardwall'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/cardwall'
 
 # setup sqlalchemy
 engine = create_engine(app.config['DATABASE_URI'], isolation_level="READ UNCOMMITTED")
@@ -64,7 +65,7 @@ def token_getter():
 @app.route('/github-callback')
 @github.authorized_handler
 def authorized(access_token):
-    next_url = request.args.get('next') or url_for('index')
+    next_url = request.args.get('next') or url_for('projects')
     if access_token is None:
         return redirect(next_url)
 
@@ -79,13 +80,6 @@ def authorized(access_token):
     db_session.commit()
 
     session['user_id'] = user.id
-    return redirect('/projects')
-
-
-@app.route('/')
-def index():
-    if session.get('user_id', None) is None:
-        return redirect('/login')
     return redirect('/projects')
 
 
@@ -111,6 +105,7 @@ def logout():
 
 
 @app.route('/new-project', methods=['GET', 'POST'])
+@login_required
 def new_project():
     form = ProjectForm(request.form)
     if request.method == 'POST':
@@ -136,13 +131,16 @@ def new_project():
         "new_project.html", form=form, view_url=url_for('new_project'))
 
 
+@app.route('/')
 @app.route('/projects')
+@login_required
 def projects():
     projects = Projects.query.filter_by(author_id=g.user.id)
     return render_template("projects.html", project_list=projects)
 
 
 @app.route('/project/<int:project_id>/edit', methods=['GET', 'POST'])
+@login_required
 def edit_project(project_id):
     project = Projects.query.get(int(project_id))
     if request.method == 'GET':
@@ -185,6 +183,7 @@ def edit_project(project_id):
 
 
 @app.route('/project/<int:project_id>/delete', methods=['POST'])
+@login_required
 def delete_project(project_id):
     project = Projects.query.get(int(project_id))
     db_session.delete(project)
@@ -194,6 +193,7 @@ def delete_project(project_id):
 
 
 @app.route('/project/<int:project_id>/labels', methods=['GET', 'POST'])
+@login_required
 def add_labels(project_id):
     if request.method == 'GET':
         project = Projects.query.get(int(project_id))
@@ -217,6 +217,7 @@ def add_labels(project_id):
 
 
 @app.route('/project/<int:project_id>/order-labels', methods=['GET', 'POST'])
+@login_required
 def order_labels(project_id):
     project = Projects.query.get(int(project_id))
     if request.method == 'GET':
@@ -259,19 +260,15 @@ def update_issues(issue_dict, project_id):
     for label, gh_issue_list in issue_dict.items():
         for gh_issue in gh_issue_list:
             # get the repository object for this issue
-            print 'b4 finding repo : ', datetime.now()
             repo = repo_dict.get(gh_issue.repository.id)
             if repo is None:
-                print 'accessing db  : ', datetime.now()
                 repo = Repositories.query.filter_by(project_id=project_id, github_repo_id=gh_issue.repository.id).first()
                 repo_dict.setdefault(gh_issue.repository.id, repo)
-            print 'af finding repo : ', datetime.now()
             # check whether DB Issue exists for the project with DB repo.id and github issue number
             # If not create one
             # Also, we have to save the labels associated with the issues.
             instance = Issues.query.filter_by(repository_id=repo.id, number=gh_issue.number).first()
             if not instance:
-                print 'creating new issue : ', datetime.now()
                 db_issue = Issues(repository_id=repo.id, title=gh_issue.title, body=gh_issue.body, number=gh_issue.number)
                 # update the issue labels
                 # Get all the labels registered for the project
@@ -282,9 +279,7 @@ def update_issues(issue_dict, project_id):
                         project_label = Labels.query.filter_by(project_id=project_id, name=gh_lbl.name).first()
                         db_issue.labels.append(project_label)
                 db_session.add(db_issue)
-        print 'before commit : ', datetime.now()
         db_session.commit()
-        print 'after commit : ', datetime.now()
     return True
 
 
@@ -299,15 +294,13 @@ def get_project_issue_dict(project, DB=True):
         repo_list = [repo.name for repo in project.repositories]
         labels = Labels.query.filter_by(project_id=project.id).order_by('order')
         issue_dict = get_issue_dict(g.user, repo_list, labels)
-        print 'calling update_issues : ', datetime.now()
         #update_issues(issue_dict, project.id)
-        print 'after update_issues : ', datetime.now()
     return issue_dict
 
 
 @app.route('/project/<int:project_id>', methods=['GET'])
+@login_required
 def show_project(project_id):
-    #print 'inside show : ', datetime.now()
     project = Projects.query.get(int(project_id))
 
     form = ProjectIssueForm(request.form)
@@ -316,7 +309,6 @@ def show_project(project_id):
 
     labels = Labels.query.filter_by(project_id=project_id).order_by('order')
     issue_dict = get_project_issue_dict(project, DB=False)
-    #print 'leaving show : ', datetime.now()
 
     return render_template('/issues_list.html', project=project, label_list=labels,
                            issues_dict=issue_dict, form=form,
@@ -326,10 +318,7 @@ def show_project(project_id):
 @app.route('/project/<int:project_id>/issue/new', methods=['GET','POST'])
 def new_issue(project_id):
     form = ProjectIssueForm(request.form)
-
     #project = Projects.query.get(int(project_id))
-    print '============== creating new issue ....'
-
     if request.method == 'POST':
         repo_id, repo_name = form.repository.data.split('*')
         issue = create_new_issue(user=g.user, repo_name=repo_name,
