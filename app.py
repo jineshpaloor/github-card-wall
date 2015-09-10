@@ -1,7 +1,7 @@
 import json
 from collections import defaultdict
 from flask import Flask, request, g, session, redirect, url_for
-from flask import render_template_string, jsonify
+from flask import jsonify
 from flask import render_template
 from flask.ext.github import GitHub as AuthGithub
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -312,20 +312,14 @@ def show_project(project_id):
 
 @app.route('/project/<int:project_id>/issue/new', methods=['GET','POST'])
 def new_issue(project_id):
-    form = ProjectIssueForm(request.form)
-    #project = Projects.query.get(int(project_id))
-    if request.method == 'POST':
-        repo_id, repo_name = form.repository.data.split('*')
-        issue = create_new_issue(user=g.user, repo_name=repo_name,
-                                 title=form.title.data, body=form.body.data, label_name=form.label.data)
-
-        return redirect(url_for('show_project', project_id=project_id))
-    # else:
-    #     form.repository.choices = [('{0}*{1}'.format(repo.id, repo.name), repo.name)
-    #                                for repo in project.repositories]
-    #     form.label.data = label_name
-    #     return render_template('create_issue.html', form=form,
-    #                            create_url=url_for('new_issue', project_id=project_id, label_name=label_name))
+    form = ProjectIssueForm(request.args)
+    repo_id, repo_name = form.repository.data.split('*')
+    issue = create_new_issue(
+        user=g.user, repo_name=repo_name, title=form.title.data, 
+        body=form.body.data, label_name=form.label.data)
+    label = Labels.query.filter_by(name=form.label.data).first()
+    html = str(render_template('issue.html', issue=issue, label=label))
+    return jsonify({'success' : True, 'html' : html})
 
 if __name__ == '__main__':
     import os

@@ -100,15 +100,29 @@ GithubCardWall.cardwallModule = (function(){
     var createIssue = function(){
         $(".create_issue").on('click', function(e) {
             e.preventDefault();
-
+            var that = $(this);
             var issue_form = $('#form_create_issue');
             var label_name = $(this).data('labelname');
 
             $("#label").val(label_name);
             $('#modal_new_issue').removeClass('hide');
+            $("#issue-creation-ok").addClass("hidden");
             $('#modal_new_issue').modal('show').one('click', '#submit', function (e) {
-                //console.log('submit button clicked .... ');
-                issue_form.trigger('submit');
+                var url = $(issue_form).attr("action");
+                var data = $(issue_form).serialize();
+                $.getJSON(
+                    $SCRIPT_ROOT + url,
+                    data,
+                    function(data) {
+                        $("#loader_image").addClass("hidden");
+                        if(data.success) {
+                            console.log("issue created");
+                            $(that).parents('div.swim-lane').find('div.my-list-group').append(data.html);
+                            $("#issue-creation-ok").removeClass("hidden");
+                        }
+                        else console.log("operation failed. Please reload the page");
+                    }
+                );
             });
         });
     };
@@ -162,8 +176,8 @@ GithubCardWall.labelorderModule = (function(){
                 label_dict,
                 function(data) {
                     $("#loader_image").addClass("hidden");
-                    $("#id_label_order_alert p").text(data.message);
-                    $("#id_label_order_alert").removeClass("hidden");
+                    $("#id_message_label p").text(data.message);
+                    $("#id_message_label").removeClass("hidden");
                 }
             );
         };
