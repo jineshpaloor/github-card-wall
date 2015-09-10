@@ -157,18 +157,15 @@ GithubCardWall.labelorderModule = (function(){
         });
 
         var update_label_order = function(project_id, label_dict){
-                $.getJSON(
-                    $SCRIPT_ROOT + '/project/'+project_id+'/update-labels' ,
-                    label_dict,
-                    function(data) {
-                        $("#loader_image").addClass("hidden");
-                        if(data.success) {
-                            alert("label order changed");
-                        }
-                        else alert("operation failed. Please reload the page");
-                    }
-                );
-
+            $.getJSON(
+                $SCRIPT_ROOT + '/project/'+project_id+'/update-labels' ,
+                label_dict,
+                function(data) {
+                    $("#loader_image").addClass("hidden");
+                    $("#id_label_order_alert p").text(data.message);
+                    $("#id_label_order_alert").removeClass("hidden");
+                }
+            );
         };
 
         $("#save_label_order").click(function(){

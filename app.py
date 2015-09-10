@@ -147,7 +147,7 @@ def edit_project(project_id):
         form.repositories.data = ['{0}*{1}'.format(repo.github_repo_id, repo.name)
                                   for repo in project.repositories]
 
-        return render_template('/new_project.html', form=form,
+        return render_template('new_project.html', form=form,
                                view_url=url_for('edit_project', project_id=project_id))
     else:
         # for POST method type
@@ -199,7 +199,7 @@ def add_labels(project_id):
         labels_form = ProjectLabelsForm()
         labels_form.labels.choices = [(l, l) for l in labels]
         labels_form.labels.data = [l.name for l in project.labels]
-        return render_template("/select_labels.html", project=project, form=labels_form)
+        return render_template("select_labels.html", project=project, form=labels_form)
     else:
         project = Projects.query.get(project_id)
         # if this is editing an existing project, delete existing labels
@@ -214,16 +214,13 @@ def add_labels(project_id):
         return redirect(url_for('order_labels', project_id=project_id))
 
 
-@app.route('/project/<int:project_id>/order-labels', methods=['GET', 'POST'])
+@app.route('/project/<int:project_id>/order-labels', methods=['GET'])
 @login_required
 def order_labels(project_id):
     project = Projects.query.get(int(project_id))
-    if request.method == 'GET':
-        # labels need to be shown as per order
-        labels = Labels.query.filter_by(project_id=project_id).order_by('order')
-        return render_template('/order_labels.html', labels=labels, project=project)
-    else:
-        return redirect(url_for('show_project', project_id=project_id))
+    # labels need to be shown as per order
+    labels = Labels.query.filter_by(project_id=project_id).order_by('order')
+    return render_template('order_labels.html', labels=labels, project=project)
 
 
 @app.route('/project/<int:project_id>/update-labels', methods=['GET', 'POST'])
@@ -233,11 +230,12 @@ def update_labels_order(project_id):
         d = request.args.get('labels')
         d = dict(request.args)
         for label, index in d.items():
-            Labels.query.filter_by(name=label, project_id=project_id).update(
-                    {'order': index[0]})
+            Labels.query.filter_by(
+                name=label, project_id=project_id
+            ).update({'order': index[0]})
 
         db_session.commit()
-    return jsonify({'success': True})
+    return jsonify({'success': True, 'message': 'Label order saved!'})
 
 
 @app.route('/change_label', methods=['GET'])
@@ -307,7 +305,7 @@ def show_project(project_id):
     labels = Labels.query.filter_by(project_id=project_id).order_by('order')
     issue_dict = get_project_issue_dict(project, DB=False)
 
-    return render_template('/issues_list.html', project=project, label_list=labels,
+    return render_template('issues_list.html', project=project, label_list=labels,
                            issues_dict=issue_dict, form=form,
                            create_url=url_for('new_issue', project_id=project_id))
 
@@ -326,7 +324,7 @@ def new_issue(project_id):
     #     form.repository.choices = [('{0}*{1}'.format(repo.id, repo.name), repo.name)
     #                                for repo in project.repositories]
     #     form.label.data = label_name
-    #     return render_template('/create_issue.html', form=form,
+    #     return render_template('create_issue.html', form=form,
     #                            create_url=url_for('new_issue', project_id=project_id, label_name=label_name))
 
 if __name__ == '__main__':
