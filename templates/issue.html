@@ -1,0 +1,13 @@
+<div id="{{ issue.id }}" data-repo="{{ issue.repository.name }}"
+     data-label="{{ label.name }}" data-number="{{ issue.number }}" class="card">
+    <div class="card-title">
+        <div class="pull-left" title="{{ issue.repository.name }}"><b>#{{ issue.number }}</b></div>
+        <div class="card-title-bar" title="{{ issue.title }}"><b>{{ issue.title }}</b></div>
+    </div>
+    <div class="card-body">
+        {{ issue.body }}
+    </div>
+    <div class="card-footer" title="{{ issue.repository.name }}">
+        <b>{{ issue.repository.name }}</b>
+    </div>
+</div>
