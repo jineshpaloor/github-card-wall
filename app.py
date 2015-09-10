@@ -87,9 +87,7 @@ def authorized(access_token):
 # what one can do with Github object
 @app.route('/login')
 def login():
-    if session.get('user_id', None) is None:
-        return render_template("login.html")
-    return redirect('/projects')
+    return render_template("login.html")
 
 
 @app.route('/github-login')
@@ -249,7 +247,6 @@ def change_label():
     to_label = request.args.get('to_label')
     issue_number = request.args.get('issue_no')
     repo_name = request.args.get('repo')
-    print '+++++++++++ from : %s, to : %s' %(from_label, to_label)
     change_issue_label(g.user, from_label, to_label, repo_name, issue_number)
 
     return jsonify({'success' : True, 'issue_id' : issue_id})
