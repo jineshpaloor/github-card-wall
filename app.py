@@ -26,7 +26,7 @@ app.config.from_object(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 
 # setup sqlalchemy
-engine = create_engine(app.config['DATABASE_URI'], isolation_level="READ UNCOMMITTED")
+engine = create_engine(os.environ['DATABASE_URL'], isolation_level="READ UNCOMMITTED")
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 
 Base.query = db_session.query_property()
