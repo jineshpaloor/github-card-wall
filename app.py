@@ -22,7 +22,7 @@ from github_api import get_user_login_name, get_repo_list, get_label_list, \
 # setup flask
 app = Flask(__name__)
 app.config.from_object(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/cardwall'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 
 # setup sqlalchemy
 engine = create_engine(app.config['DATABASE_URI'], isolation_level="READ UNCOMMITTED")
