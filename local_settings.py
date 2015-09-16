@@ -1,6 +1,6 @@
 import os
-DATABASE_URI = 'sqlite:///cardwall.db'
-#DATABASE_URI = "postgresql://localhost/cardwall"
+#DATABASE_URI = 'sqlite:///cardwall.db'
+DATABASE_URI = "postgresql://localhost/cardwall"
 SECRET_KEY = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT' #os.urandom(32) #
 DEBUG = True
 LOCAL = False
