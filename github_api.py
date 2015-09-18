@@ -23,6 +23,18 @@ def get_repo_list(user):
             for repo in git_user.get_repos(type='all')]
 
 
+def get_users_list(user, repo_name_list):
+    github = Github(login_or_token=user.github_access_token)
+    git_user = github.get_user()
+
+    user_list = set()
+    for repo_name in repo_name_list:
+        repo = get_a_repo(git_user, repo_name)
+        for g_user in repo.get_collaborators():
+            user_list.add(g_user)
+    return user_list
+
+
 def get_label_list(user, repo_name_list):
     label_list = set()
     github = Github(login_or_token=user.github_access_token)

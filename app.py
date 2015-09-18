@@ -12,13 +12,13 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from local_settings import DATABASE_URI, SECRET_KEY, DEBUG, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 from models import Labels, Repositories, Projects, Users, Base, Issues
-from forms import ProjectForm, ProjectLabelsForm, ProjectIssueForm
+from forms import ProjectForm, ProjectLabelsForm, ProjectIssueForm, ProjectMemberForm
 from decorator import login_required
 
 from datetime import datetime
 import logging
 from github_api import get_user_login_name, get_repo_list, get_label_list, \
-    get_issue_dict, change_issue_label, create_new_issue
+    get_issue_dict, change_issue_label, create_new_issue, get_users_list
 
 # setup flask
 app = Flask(__name__)
@@ -194,15 +194,15 @@ def delete_project(project_id):
 @app.route('/project/<int:project_id>/labels', methods=['GET', 'POST'])
 @login_required
 def add_labels(project_id):
+    project = Projects.query.get(int(project_id))
     if request.method == 'GET':
-        project = Projects.query.get(int(project_id))
         labels = get_label_list(g.user, [repo.name for repo in project.repositories])
         labels_form = ProjectLabelsForm()
         labels_form.labels.choices = [(l, l) for l in labels]
         labels_form.labels.data = [l.name for l in project.labels]
         return render_template("select_labels.html", project=project, form=labels_form)
     else:
-        project = Projects.query.get(project_id)
+        #project = Projects.query.get(project_id)
         # if this is editing an existing project, delete existing labels
         for lbl in project.labels:
             db_session.delete(lbl)
@@ -212,6 +212,24 @@ def add_labels(project_id):
             label = Labels(name=lbl, project_id=project.id, order=i+1)
             db_session.add(label)
         db_session.commit()
+        return redirect(url_for('select_members', project_id=project_id))
+
+
+@app.route('/project/<int:project_id>/select-members', methods=['GET', 'POST'])
+@login_required
+def select_members(project_id):
+    project = Projects.query.get(int(project_id))
+    if request.method == 'GET':
+        repo_name_list = [repo.name for repo in project.repositories]
+        collaborators = get_users_list(g.user, repo_name_list)
+
+        members_form = ProjectMemberForm()
+        members_form.members.choices = [(member.id, member.login) for member in collaborators]
+        #members_form.members.data = [member.login for member in project.members]
+
+        return render_template("select_members.html", project=project, form=members_form)
+    else:
+        # TODO : save the selection
         return redirect(url_for('order_labels', project_id=project_id))
 
 

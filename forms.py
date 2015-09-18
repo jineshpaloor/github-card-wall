@@ -5,8 +5,10 @@ class ProjectForm(Form):
     name = StringField('Name', [validators.Length(max=30, min=4), validators.InputRequired()])
     repositories = SelectMultipleField('Repos', [validators.InputRequired()])
 
+
 class ProjectLabelsForm(Form):
     labels = SelectMultipleField('Labels', [validators.InputRequired()])
+
 
 class ProjectIssueForm(Form):
     title = StringField('Title', [validators.Length(max=30, min=4), validators.InputRequired()])
@@ -14,3 +16,6 @@ class ProjectIssueForm(Form):
     label = StringField('Label')
     repository = SelectField('Repository', [validators.InputRequired()])
 
+
+class ProjectMemberForm(Form):
+    members = SelectMultipleField('Members', [validators.InputRequired()])
