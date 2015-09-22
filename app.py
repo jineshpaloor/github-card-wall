@@ -6,6 +6,8 @@ from flask import jsonify
 from flask import render_template
 from flask.ext.github import GitHub as AuthGithub
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.script import Manager
+from flask.ext.migrate import Migrate, MigrateCommand
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -32,6 +34,12 @@ db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind
 Base.query = db_session.query_property()
 
 logging.basicConfig(filename='CardWallApp.log', level=logging.INFO)
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 
 def init_db():
@@ -345,3 +353,4 @@ if __name__ == '__main__':
     init_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
+    manager.run()

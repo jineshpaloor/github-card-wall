@@ -20,6 +20,13 @@ issue_labels = Table(
     PrimaryKeyConstraint('issue_id', 'label_id')
 )
 
+project_collaborators = Table(
+    'project_collaborators', Base.metadata,
+    Column('project_id', Integer, ForeignKey('projects.id')),
+    Column('user_id', Integer, ForeignKey('users.id')),
+    PrimaryKeyConstraint('project_id', 'user_id')
+)
+
 
 class Users(Base):
     __tablename__ = 'users'
@@ -42,6 +49,7 @@ class Projects(Base):
 
     repositories = relationship("Repositories", cascade='all, delete-orphan', backref='projects')
     labels = relationship("Labels", cascade='all, delete-orphan', backref='projects')
+    collaborators = relationship("Users", cascade='all, delete-orphan', backref='projects', secondary=project_collaborators)
 
 
 class Repositories(Base):
