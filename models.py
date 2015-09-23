@@ -49,7 +49,7 @@ class Projects(Base):
 
     repositories = relationship("Repositories", cascade='all, delete-orphan', backref='projects')
     labels = relationship("Labels", cascade='all, delete-orphan', backref='projects')
-    collaborators = relationship("Users", cascade='all, delete-orphan', backref='projects', secondary=project_collaborators)
+    collaborators = relationship("Users", secondary=project_collaborators, backref='projects_collaborators')
 
 
 class Repositories(Base):

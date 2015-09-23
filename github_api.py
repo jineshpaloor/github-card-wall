@@ -7,6 +7,9 @@ def get_user_login_name(access_token):
     github = Github(login_or_token=access_token)
     return github.get_user().login
 
+def get_github_user(access_token):
+    github = Github(login_or_token=access_token)
+    return github.get_user()
 
 def get_project_list(user_id):
     pass

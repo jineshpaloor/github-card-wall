@@ -19,8 +19,9 @@ from decorator import login_required
 
 from datetime import datetime
 import logging
-from github_api import get_user_login_name, get_repo_list, get_label_list, \
-    get_issue_dict, change_issue_label, create_new_issue, get_users_list
+from github_api import get_user_login_name, get_repo_list, get_label_list
+from github_api import get_issue_dict, change_issue_label, create_new_issue
+from github_api import get_users_list, get_github_user
 
 # setup flask
 app = Flask(__name__)
@@ -78,10 +79,10 @@ def authorized(access_token):
     if access_token is None:
         return redirect(next_url)
 
-    user_name = get_user_login_name(access_token)
-    user = Users.query.filter_by(username=user_name).first()
+    guser = get_github_user(access_token)
+    user = Users.query.filter_by(username=guser.login).first()
     if user is None:
-        user = Users(username=user_name, github_access_token=access_token)
+        user = Users(username=guser.login, email_id=guser.email, github_access_token=access_token)
     else:
         user.github_access_token = access_token
 
@@ -230,14 +231,23 @@ def select_members(project_id):
     if request.method == 'GET':
         repo_name_list = [repo.name for repo in project.repositories]
         collaborators = get_users_list(g.user, repo_name_list)
-
+        # add collaborators to database
+        for u in collaborators:
+            user = Users.query.filter_by(username=u.login).first()
+            if user is None:
+                user = Users(username=u.login, email_id=u.email)
+                db_session.add(user)
+        db_session.commit()
         members_form = ProjectMemberForm()
-        members_form.members.choices = [(member.id, member.login) for member in collaborators]
-        #members_form.members.data = [member.login for member in project.members]
-
+        members_form.members.choices = [(member.login, member.login) for member in collaborators]
         return render_template("select_members.html", project=project, form=members_form)
     else:
-        # TODO : save the selection
+        # save selected labels
+        for username in request.form.getlist('members'):
+            user = Users.query.filter_by(username=username).first()
+            project.collaborators.append(user)
+        db_session.add(project)
+        db_session.commit()
         return redirect(url_for('order_labels', project_id=project_id))
 
 
