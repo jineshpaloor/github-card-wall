@@ -36,7 +36,7 @@ def get_users_list(user, repo_name_list):
         repo = get_a_repo(git_user, repo_name)
         for g_user in repo.get_collaborators():
             user_list.add(g_user)
-    return toolz.unique(user_list, key=lambda x: x.login)
+    return [user for user in toolz.unique(user_list, key=lambda x: x.login)]
 
 
 def get_label_list(user, repo_name_list):
