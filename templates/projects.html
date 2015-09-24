@@ -8,19 +8,22 @@
 {% endblock %}
 
 {% block content %}
+
 <ul class="list-group">
-    {% for project in project_list %}
-    <li class="list-group-item clearfix">
-        <a href="/project/{{ project.id }}" class="pull-left">{{ project.name }}</a>
-        <form action="/project/{{ project.id }}/delete" method="POST">
-            <button class='btn btn-danger btn-xs pull-right' type="submit" name="delete_project" value="delete"><span class="fa fa-times"></span> delete</button>
-        </form>
-        <a href="/project/{{ project.id }}/edit" class="pull-right btn btn-primary btn-xs">Edit Repos</a>
-        <a href="/project/{{ project.id }}/labels" class="pull-right btn btn-primary btn-xs">Edit Labels</a>
-        <a href="/project/{{ project.id }}/order-labels" class="pull-right btn btn-primary btn-xs">Order Labels</a>
-        <a href="/project/{{ project.id }}/select-members" class="pull-right btn btn-primary btn-xs">Add Collaborators</a>
-    </li>
-    {% endfor %}
+    {% if project_list %}
+        {% for project in project_list %}
+        <li class="list-group-item clearfix">
+            <a href="/project/{{ project.id }}" class="pull-left">{{ project.name }}</a>
+            <form action="/project/{{ project.id }}/delete" method="POST">
+                <button class='btn btn-danger btn-xs pull-right' type="submit" name="delete_project" value="delete"><span class="fa fa-times"></span> delete</button>
+            </form>
+            <a href="/project/{{ project.id }}/edit" class="pull-right btn btn-primary btn-xs">Edit Repos</a>
+            <a href="/project/{{ project.id }}/labels" class="pull-right btn btn-primary btn-xs">Edit Labels</a>
+            <a href="/project/{{ project.id }}/order-labels" class="pull-right btn btn-primary btn-xs">Order Labels</a>
+            <a href="/project/{{ project.id }}/select-members" class="pull-right btn btn-primary btn-xs">Add Collaborators</a>
+        </li>
+        {% endfor %}
+    {% endif %}
 </ul>
 
 <!-- prject delete confirm modal -->

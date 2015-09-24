@@ -143,7 +143,12 @@ def new_project():
 @app.route('/projects')
 @login_required
 def projects():
-    projects = Projects.query.filter_by(author_id=g.user.id)
+    #projects = Projects.query.filter_by(author_id=g.user.id)
+    #projects = Users.query.filter(Users.projects_collaborators.any(id=g.user.id))
+    #projects = Projects.query.filter(Users.projects_collaborators.any(user_id=g.user.id))
+    #projects = Projects.query.filter(Projects.users.any(id = g.user.id))
+    #print projects
+    projects = Projects.query.filter(Projects.collaborators.any(Users.id.in_([g.user.id])))
     return render_template("projects.html", project_list=projects)
 
 
