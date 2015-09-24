@@ -23,8 +23,8 @@ def get_repo_list(user):
     """ Get all github repositories of the user."""
     github = Github(login_or_token=user.github_access_token)
     git_user = github.get_user()
-    return [('{0}*{1}'.format(repo.id, repo.name), repo.name) 
-            for repo in git_user.get_repos(type='all')]
+    return sorted([('{0}*{1}'.format(repo.id, repo.name), repo.name) 
+        for repo in git_user.get_repos(type='all')], key=lambda x: x[1])
 
 
 def get_users_list(user, repo_name_list):
@@ -36,7 +36,7 @@ def get_users_list(user, repo_name_list):
         repo = get_a_repo(git_user, repo_name)
         for g_user in repo.get_collaborators():
             user_list.add(g_user)
-    return [user for user in toolz.unique(user_list, key=lambda x: x.login)]
+    return sorted([user for user in toolz.unique(user_list, key=lambda x: x.login)], key=lambda x: x.login)
 
 
 def get_label_list(user, repo_name_list):
@@ -48,7 +48,7 @@ def get_label_list(user, repo_name_list):
         repo = get_a_repo(git_user, repo_name)
         for lbl in repo.get_labels():
             label_list.add(lbl.name)
-    return label_list
+    return sorted(label_list)
 
 
 def get_issue_dict(user, repo_list, lbl_list):
@@ -80,7 +80,6 @@ def change_issue_label(user, lbl_from, lbl_to, repo_name, issue_number):
     # check if the destination label is DONE
     if lbl_to == "DONE":
         # change the status of the issue to close
-        print 'inside DONE part : calling edit() '
         issue.edit(state='closed')
     else:
         # remove the from label
@@ -103,7 +102,6 @@ def change_issue_label(user, lbl_from, lbl_to, repo_name, issue_number):
 
 
 def create_new_issue(user, repo_name, title, body, label_name):
-    print 'inside create_new_issue : ', repo_name, label_name
 
     github = Github(login_or_token=user.github_access_token)
     git_user = github.get_user()
@@ -113,7 +111,6 @@ def create_new_issue(user, repo_name, title, body, label_name):
 
     # check if this label exists in this repo, if not create one
     if len(label_objects) == 0:
-        print 'creating new label : ', label_name
         new_label = repo.create_label(label_name, "00ff00")
         label_objects = [new_label]
 
