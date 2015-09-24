@@ -122,6 +122,7 @@ def new_project():
             project = Projects(name=form.name.data, author_id=g.user.id)
             db_session.add(project)
             db_session.commit()
+            project.collaborators.append(g.user)
             repo_name_list = []
             for repo in form.repositories.data:
                 repo_id, repo_name = repo.split('*')
