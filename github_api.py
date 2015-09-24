@@ -17,7 +17,7 @@ def get_project_list(user_id):
 
 def get_a_repo(github_user, repo_name):
     f_list = filter(lambda r:r.name == repo_name, github_user.get_repos(type='all'))
-    return f_list[0]
+    return f_list[0] if f_list else None
 
 def get_repo_list(user):
     """ Get all github repositories of the user."""
@@ -46,6 +46,8 @@ def get_label_list(user, repo_name_list):
 
     for repo_name in repo_name_list:
         repo = get_a_repo(git_user, repo_name)
+        if repo is None:
+            continue
         for lbl in repo.get_labels():
             label_list.add(lbl.name)
     return sorted(label_list)
@@ -60,6 +62,8 @@ def get_issue_dict(user, repo_list, lbl_list):
 
     for repo_name in repo_list:
         repo = get_a_repo(git_user, repo_name)
+        if repo is None:
+            continue
         issue_list = repo.get_issues()
         for issue in issue_list:
             for lbl in issue.labels:
