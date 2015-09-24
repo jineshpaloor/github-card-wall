@@ -131,7 +131,7 @@ def new_project():
                     project_id=project.id)
                 db_session.add(repository)
             db_session.commit()
-            return redirect('/project/{0}/labels'.format(project.id))
+            return redirect(url_for('add_labels', project_id=project.id))
 
     # this is for GET request
     form.repositories.choices = get_repo_list(g.user)
@@ -166,7 +166,6 @@ def edit_project(project_id):
         new_repo_id_name_dict = dict([repo.split('*') for repo in form.repositories.data])
         new_repos = new_repo_id_name_dict.values()
 
-
         project_repos = [repo.name for repo in project.repositories]
 
         obsolete_repos = set(project_repos) - set(new_repos)
@@ -185,9 +184,7 @@ def edit_project(project_id):
             repo_object = Repositories(name=repo_name, github_repo_id=repo_id[0], project_id=project.id)
             db_session.add(repo_object)
         db_session.commit()
-
-        return render_template("select_labels.html", project=project,
-                               label_list=get_label_list(g.user, new_repos))
+        return redirect(url_for('add_labels', project_id=project_id))
 
 
 @app.route('/project/<int:project_id>/delete', methods=['POST'])
@@ -196,7 +193,6 @@ def delete_project(project_id):
     project = Projects.query.get(int(project_id))
     db_session.delete(project)
     db_session.commit()
-
     return redirect('/projects')
 
 
@@ -239,7 +235,10 @@ def select_members(project_id):
                 db_session.add(user)
         db_session.commit()
         members_form = ProjectMemberForm()
-        members_form.members.choices = [(member.login, member.login) for member in collaborators]
+        members_form.members.choices = [
+           (member.login, member.name if member.name else member.login) 
+           for member in collaborators]
+        members_form.members.data = [member.username for member in project.collaborators]
         return render_template("select_members.html", project=project, form=members_form)
     else:
         # save selected labels
